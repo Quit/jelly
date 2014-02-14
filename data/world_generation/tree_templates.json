@@ -1,0 +1,41 @@
+{
+	"tree_templates" : {
+		"jelly:template:default_tree" : {
+		},
+		
+		"jelly:template:small_tree" : {
+			"base" : [ "jelly:template:default_tree" ],
+			"threshold" : 0,
+			"cluster" : true,
+			"cluster_density" : 0.5,
+			"cluster_factor" : 0.5,
+			"vegetation_chance" : 0.2,
+			"cluster_exclusion_radius" : 2
+		},
+		
+		"jelly:template:medium_tree" : {
+			"base" : [ "jelly:template:default_tree" ],
+			"threshold" : 6
+		},
+		
+		"jelly:template:large_tree" : {
+			"base" : [ "jelly:template:default_tree" ],
+			"threshold" : 25
+		},
+		
+		"jelly:template:foothill_juniper" : {
+			"chance" : "elevation > terrain.max_height and 0.8 or (elevation > terrain.max_height - terrain.step_size and 0.2)",
+			"terrain_types" : [ "foothills" ]
+		},
+		
+		"jelly:template:mountain_juniper" : {
+			"chance" : 0.25,
+			"terrain_types" : [ "mountains" ],
+			"vegetation_chance" : 0.75
+		},
+		
+		"jelly:template:oak" : {
+			"terrain_types" : [ "plains", "foothills" ]
+		}
+	}
+}

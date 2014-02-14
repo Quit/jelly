@@ -1,0 +1,13 @@
+{
+	"info" : { "name" : "Jelly™" },
+	
+	"server_init_script" : "file(jelly_landscaper_server)",
+	
+	"aliases" : {
+		"index:trees" : "file(data/world_generation/trees.json)",
+		"index:tree_templates" : "file(data/world_generation/tree_templates.json)"
+	},
+	
+	"overrides" : {
+	}
+}
