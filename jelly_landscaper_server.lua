@@ -5,11 +5,10 @@ require('jelly')
 local MOD = class()
 
 function MOD:__init()
---~ 	radiant.events.listen(radiant, 'radiant:modules_loaded', self, self._patch_all)
+	radiant.events.listen(radiant, 'radiant:modules_loaded', self, self._patch_all)
 end
 
 function MOD:_patch_all()
-	radiant.mods.require('rp.rp_server')
 	self:_patch('stonehearth.services.world_generation.landscaper', 'jelly.overrides.services.world_generation.landscaper')
 end
 
@@ -34,7 +33,6 @@ end
 			return radiant.mods.require(original_mod .. path)
 		end
 		
-		log:spam('require %s', patched_path)
 		local patch = radiant.mods.require(patched_path)
 		
 		require = old_require
@@ -44,24 +42,18 @@ end
 			return
 		end
 		
-		log:spam('clear...')
 		-- Clear source
 		for k, v in pairs(source) do
 			source[k] = nil
 		end
 		
-		log:spam('copy...')
 		-- Create the patch
 		for k, v in pairs(patch) do
 			source[k] = v
 		end
 		
-		log:spam('set meta...')
-		
 		-- Set the metatable
 		setmetatable(source, getmetatable(patch))
-		
-		PrintTable(source)
 	end
 
 return MOD()

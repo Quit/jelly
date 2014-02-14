@@ -15,16 +15,16 @@
 		
 		"jelly:template:medium_tree" : {
 			"base" : [ "jelly:template:default_tree" ],
-			"threshold" : 6
+			"threshold" : 4
 		},
 		
 		"jelly:template:large_tree" : {
 			"base" : [ "jelly:template:default_tree" ],
-			"threshold" : 25
+			"threshold" : 20
 		},
 		
 		"jelly:template:foothill_juniper" : {
-			"chance" : "elevation > terrain.max_height and 0.8 or (elevation > terrain.max_height - terrain.step_size and 0.2)",
+			"chance" : "step == 2 and 0.25 or 0.75",
 			"terrain_types" : [ "foothills" ]
 		},
 		

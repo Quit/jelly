@@ -1,4 +1,12 @@
 	{
+	"example_trees" : [
+		{
+			"template" : [ "jelly:template:small_tree" ],
+			"entity_ref" : "rp_test:pony",
+			"terrain_types" : [ "plains" ]
+		}
+	],
+	
 	"trees" : [
 		{
 			"template" : [ "jelly:template:small_tree", "jelly:template:oak" ],
