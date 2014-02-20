@@ -272,7 +272,7 @@ function Landscaper:_place_small_tree(feature_name, i, j, tile_map, place_item)
 end
 
 function Landscaper:_place_normal_tree(feature_name, i, j, tile_map, place_item)
-	log:spam('place normal %s', feature_name)
+--~ 	log:spam('place normal %s', feature_name)
   local max_trunk_radius = 3
   local ground_radius = 2
   local rng = self._rng
@@ -583,7 +583,12 @@ function Landscaper:_initialize_function_table()
 		
 		-- Do we need to evaluate chance?
 		if type(tree.chance) == 'string' then
-			tree.chance = loadstring('function(terrain, step) return ' .. tree.chance .. ' end')
+			local func, err = loadstring('local terrain, step = ... return ' .. tree.chance)
+			if not func then
+				log:error('cannot compile function %q: %s', tree.chance, err)
+			end
+			
+			tree.chance = func
 		end
 		
 		tree.jelly_id = 'jelly_tree_' .. last_id
@@ -591,10 +596,6 @@ function Landscaper:_initialize_function_table()
 		
 		function_table[tree.jelly_id] = function() end
 
-
---~         function_table[tree_name] = self._place_small_tree
---~       else
---~         function_table[tree_name] = self._place_normal_tree		
 		if tree.cluster then
 			assert(tree.cluster_exclusion_radius, "cluster_exclusion_radius missing for #" .. _)
 			assert(tree.cluster_factor, "cluster_factor missing for #" .. _)
@@ -634,55 +635,15 @@ end
 local function accept_tree(tree, chance, terrain_type, step)
 	local t = type(tree.chance)
 	if t == 'function' then
-		return tree.chance(terrain_type, step) > chance
+		local eval_chance = tree.chance(terrain_type, step)
+--~ 		log:spam('evaluated chance %s: %.2f > %.2f', tree.entity_ref, eval_chance, chance)
+		return eval_chance > chance
 	elseif t == 'number' then
 		return tree.chance > chance
 	else
 		return true
 	end
 end
-
---~ function Landscaper:_place_tree(place_item, i, j, value, elevation, terrain_type, terrain_info, perturbation_grid, feature_map, tile_map, x, y)
---~ 	-- Pick a random one
---~ 	local tree = best_tree
-
---~ 	-- Does this tree define vegetation *and* is said vegetation winning?
---~ 	if tree.vegetation_chance then
---~ 		if self._rng:get_real(0, 1) < tree.vegetation_chance then
---~ 			feature_map:set(i, j, generic_vegetation_name)
---~ 			return
---~ 		end
---~ 	end
---~ 	
---~ 	-- Cluster?
---~ 	if tree.cluster then
---~ 		local x, y, w, h, factor, nested_grid_spacing, exclusion_radius, placed
---~ 		x, y, w, h = perturbation_grid:get_cell_bounds(i, j)
---~ 		
---~ 		local factor = tree.cluster_factor
---~ 		local exclusion_radius = tree.cluster_exclusion_radius
---~ 		local nested_grid_spacing = math.floor(perturbation_grid.grid_spacing * factor)
---~ 		
---~ 		local function try_place_item(x, y)
---~ 			place_item(tree.entity_ref, x, y)
---~ 			return true
---~ 		end
---~ 		
---~ 		-- Places... tons of... trees?
---~ 		placed = self:_place_dense_items(tile_map, x, y, w, h, nested_grid_spacing, exclusion_radius, tree.cluster_density, try_place_item)
---~ 		
---~ 		if placed then
---~ 			feature_map:set(i, j, tree.ref)
---~ 		else
---~ 			feature_map:set(i, j, generic_vegetation_name)
---~ 		end
---~ 	-- No cluster.
---~ 	else
---~ 		-- TODO: Have biomes add into this chance.
---~ 		place_item(tree.entity_ref, x, y)
---~ 		feature_map:set(i, j, tree.entity_ref)
---~ 	end
---~ end
 
 function Landscaper:_get_tree_object(elevation, value, terrain_type, step)
 	-- Get the list of trees that are OK
@@ -693,7 +654,7 @@ function Landscaper:_get_tree_object(elevation, value, terrain_type, step)
 		local chance = self._rng:get_real(0, 1)
 		
 		for _, tree in pairs(terrain_trees.normal) do
-			if value >= tree.threshold and accept_tree(tree, terrain_type, step) then
+			if value >= tree.threshold and accept_tree(tree, chance, terrain_type, step) then
 				return tree
 			end
 		end
