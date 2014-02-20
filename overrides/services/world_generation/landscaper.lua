@@ -584,7 +584,7 @@ function Landscaper:_initialize_function_table()
 		
 		tree = jelly.util.mixinto(tree, parents)
 		
-		assert(tree.threshold, "threshold missing for #" .. _)
+		assert(tree.density, "density missing for #" .. _)
 		
 		-- Do we need to evaluate chance?
 		if type(tree.chance) == 'string' then
@@ -623,7 +623,7 @@ function Landscaper:_initialize_function_table()
 	end
 	
 	-- Sort all tables.
-	local function sort_by_density(a, b) return a.threshold > b.threshold end
+	local function sort_by_density(a, b) return a.density > b.density end
 	table.sort(trees, sort_by_density)
 	
 	for k, v in pairs(trees_by_terrain) do
@@ -662,7 +662,7 @@ function Landscaper:_get_tree_object(elevation, value, terrain_type, step)
 		local chance = self._rng:get_real(0, 1)
 		
 		for _, tree in pairs(terrain_trees.normal) do
-			if value >= tree.threshold and accept_tree(tree, chance, terrain_type, step) then
+			if value >= tree.density and accept_tree(tree, chance, terrain_type, step) then
 				return tree
 			end
 		end
@@ -670,7 +670,7 @@ function Landscaper:_get_tree_object(elevation, value, terrain_type, step)
 	
 	if #terrain_trees.fallback > 0 then
 		for _, tree in pairs(terrain_trees.fallback) do
-			if value >= tree.threshold then
+			if value >= tree.density then
 				return tree
 			end
 		end
