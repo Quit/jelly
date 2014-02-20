@@ -292,7 +292,9 @@ function Landscaper:place_features(tile_map, feature_map, place_item)
       fn = self._function_table[feature_name]
       if fn then
         fn(self, feature_name, i, j, tile_map, place_item)
-      end
+      elseif feature_name then
+				log:info('cannot find feature %q!', tostring(feature_name))
+			end
     end
     self:_yield()
   end
@@ -308,6 +310,7 @@ function Landscaper:mark_berry_bushes(elevation_map, feature_map)
     local mean = -50
     local std_dev = 30
     local feature = feature_map:get(i, j)
+
     if self:is_tree_name(feature) then
       mean = mean + 100
     end
@@ -315,9 +318,11 @@ function Landscaper:mark_berry_bushes(elevation_map, feature_map)
   end
   noise_map:fill_ij(noise_fn)
   FilterFns.filter_2D_050(density_map, noise_map, noise_map.width, noise_map.height, 6)
+	
   for j = 1, density_map.height do
     for i = 1, density_map.width do
       value = density_map:get(i, j)
+			
       if value > 0 then
         occupied = feature_map:get(i, j) ~= nil
         if not occupied then
@@ -338,6 +343,7 @@ function Landscaper:_place_berry_bush(feature_name, i, j, tile_map, place_item)
   local item_spacing = math.floor(perturbation_grid.grid_spacing * 0.33)
   local item_density = 0.9
   local x, y, w, h, rows, columns
+	
   local function try_place_item(x, y)
     local elevation = tile_map:get(x, y)
     local terrain_type = terrain_info:get_terrain_type(elevation)
@@ -549,7 +555,6 @@ end
 
 
 --[[ START JELLY CODE ]]--
-
 function Landscaper:_jelly_place_small_tree(jelly_id, ...)
 	return self:_place_small_tree(self._trees[jelly_id].entity_ref, ...)
 end
@@ -591,7 +596,7 @@ function Landscaper:_initialize_function_table()
 			tree.chance = func
 		end
 		
-		tree.jelly_id = 'jelly_tree_' .. last_id
+		tree.jelly_id = 'jelly_#' .. last_id .. '_tree'
 		last_id = last_id + 1
 		
 		function_table[tree.jelly_id] = function() end
@@ -630,13 +635,16 @@ function Landscaper:_initialize_function_table()
 	self._trees_by_terrain = trees_by_terrain
 	
 	self._function_table = function_table
+	
+	-- BACKWARDS COMPATIBILITY
+	function_table[berry_bush_name] = self._place_berry_bush
+  function_table[pink_flower_name] = self._place_flower
 end
 
 local function accept_tree(tree, chance, terrain_type, step)
 	local t = type(tree.chance)
 	if t == 'function' then
 		local eval_chance = tree.chance(terrain_type, step)
---~ 		log:spam('evaluated chance %s: %.2f > %.2f', tree.entity_ref, eval_chance, chance)
 		return eval_chance > chance
 	elseif t == 'number' then
 		return tree.chance > chance
