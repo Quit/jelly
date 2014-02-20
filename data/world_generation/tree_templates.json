@@ -24,7 +24,7 @@
 		},
 		
 		"jelly:template:foothill_juniper" : {
-			"chance" : "step == 2 and 0.25 or 0.75",
+			"chance" : "step == 2 and 0.75 or 0.25",
 			"terrain_types" : [ "foothills" ]
 		},
 		
