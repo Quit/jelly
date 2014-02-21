@@ -93,21 +93,21 @@ local LOADING, LOADED = 0, 1
 
 -- Loads elements[name] and makes sure to mixin parent_key stuff if encountered
 local function load_class(elements, parent_key, loaded, name)
-	log:spam('load %s', name)
+--~ 	log:spam('load_class(%q)', name)
 	local class = elements[name]
-	
-	-- Make sure it's a table. Load if necessary. Create a copy.
-	elements[name] = util.copy(resources.load_table(class))
 	
 	-- Avoid cycles.
 	if loaded[name] == LOADING then
-		log:error('already loaded %s -> cycle!', name)
-		error('cyclic behaviour detected while loading ' .. name)
+		error('cyclic behaviour detected while loading class ' .. name)
 	-- Avoid duplicate loading.
 	elseif loaded[name] == LOADED then
+--~ 		log:spam('cache_hit: %q', name)
 		return class
 	end
 
+	-- Make sure it's a table. Load if necessary. Create a copy.
+	elements[name] = util.copy(resources.load_table(class))
+	
 	-- mutex.
 	loaded[name] = LOADING
 
@@ -136,6 +136,28 @@ local function load_class(elements, parent_key, loaded, name)
 	return class
 end
 
+-- TODO: Refactor this into some sort of factory
+local classes_cache = {}
+local classes_loaded = {}
+
+--! desc Attempts to load `name` as class. `name` is a defined alias (or file path) that defines the class.
+--! param string name Name of the class to load. This has to be an alias.
+--! param string parent_key Name that defines what the class' inheritance system is based on.
+--! returns table containing the finished class
+function util.load_class(name, parent_key)
+--~ 	log:spam('util.load_class(%q)', name)
+	local class = classes_cache[name]
+	
+	if class then
+		return class
+	end
+	
+	class = load_class(util.json_table(), parent_key, classes_loaded, name)
+	
+	classes_cache[name] = class
+	return class
+end
+
 --! desc Builds "classes" out of `elements`, using `parent_key` to determine inheritance/mixintos.
 --! param table elements A hash table/object that contains the classes (`class_name => class_data`)
 --! param string parent_key The key that determines which key in a class defines its parents/mixintos
@@ -154,6 +176,20 @@ function util.build_classes(elements, parent_key)
 	end
 	
 	return elements
+end
+
+local json_table = nil
+
+--! desc Returns a table that, if accessed by key, tries to load the json identified by that name.
+--! returns Magic table.
+function util.json_table()
+	if json_table then
+		return json_table
+	end
+	
+	json_table = setmetatable({}, { __index = function(tbl, key) local json = radiant.resources.load_json(key) tbl[key] = json return json end })
+	
+	return json_table
 end
 
 --! desc Requires `file`, which is a path to a lua file (without extension), relative to "/mods".
