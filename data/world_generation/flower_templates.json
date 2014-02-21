@@ -1,0 +1,8 @@
+{
+	"flower_templates" : {
+		"jelly:template:default_flower" : {
+			"density" : 0,
+			"chance" : 0.01
+		}
+	}
+}

@@ -117,6 +117,7 @@ function Landscaper:mark_trees(elevation_map, feature_map)
   local tree_name, tree_type, tree_size, occupied, value, elevation, terrain_type, step, tree_density
 	
 	--[[ START JELLY ]]--
+	local trees_by_terrain = self._trees_by_terrain
 	local tree_object
 	--[[ END JELLY ]]--
 	
@@ -169,40 +170,36 @@ function Landscaper:mark_trees(elevation_map, feature_map)
 					--[[ JELLY START ]]--
 					
 				
-				--[[
-          tree_type = self:_get_tree_type(terrain_type, step)
-          if terrain_type ~= TerrainType.mountains then
-            tree_density = normal_tree_density
-          else
-            value = value * mountains_size_modifier
-            if step == 1 then
-              tree_density = mountains_density_base
-            else
-              tree_density = mountains_density_peaks
-            end
-          end
-          tree_size = self:_get_tree_size(value)
-          tree_name = get_tree_name(tree_type, tree_size)
-				]]
+--~           tree_type = self:_get_tree_type(terrain_type, step)
+--~           if terrain_type ~= TerrainType.mountains then
+--~             tree_density = normal_tree_density
+--~           else
+--~             value = value * mountains_size_modifier
+--~             if step == 1 then
+--~               tree_density = mountains_density_base
+--~             else
+--~               tree_density = mountains_density_peaks
+--~             end
+--~           end
+--~           tree_size = self:_get_tree_size(value)
+--~           tree_name = get_tree_name(tree_type, tree_size)
 				
-					tree_object = self:_get_tree_object(elevation, value, terrain_type, step)
+					tree_object = self:_get_flora_object(trees_by_terrain[terrain_type], value, rng, terrain_type, step)
 					if tree_object and (not tree_object.vegetation_chance or tree_object.vegetation_chance > rng:get_real(0, 1)) then
 						tree_name = tree_object.jelly_id
 					else
 						tree_name = generic_vegetation_name
 					end
 					
-					-- TODO: properly decide what to do here
-				--[[
-          if terrain_type ~= TerrainType.mountains then
-            if tree_size ~= small and tree_density <= rng:get_real(0, 1) then
-              tree_name = generic_vegetaion_name
-            end
-            feature_map:set(i, j, tree_name)
-          elseif tree_density > rng:get_real(0, 1) then
-            feature_map:set(i, j, tree_name)
-          end
-				]]--
+					-- TODO: properly decide what to do here?
+--~ 				if terrain_type ~= TerrainType.mountains then
+--~             if tree_size ~= small and tree_density <= rng:get_real(0, 1) then
+--~               tree_name = generic_vegetaion_name
+--~             end
+--~             feature_map:set(i, j, tree_name)
+--~           elseif tree_density > rng:get_real(0, 1) then
+--~             feature_map:set(i, j, tree_name)
+--~           end
 				
 				feature_map:set(i, j, tree_name)
 				
@@ -375,6 +372,11 @@ function Landscaper:mark_flowers(elevation_map, feature_map)
   local perturbation_grid = self._perturbation_grid
   local noise_map, density_map = self:_get_filter_buffers(feature_map.width, feature_map.height)
   local value, occupied, elevation, terrain_type
+	--[[ JELLY START ]]--
+	local flowers_by_terrain = self._flowers_by_terrain
+	local flower_object, step
+	--[[ JELLY END ]]--
+	
   local function noise_fn(i, j)
     local mean = 0
     local std_dev = 100
@@ -394,18 +396,30 @@ function Landscaper:mark_flowers(elevation_map, feature_map)
   end
   noise_map:fill_ij(noise_fn)
   FilterFns.filter_2D_025(density_map, noise_map, noise_map.width, noise_map.height, 8)
-  for j = 1, density_map.height do
+  
+	for j = 1, density_map.height do
     for i = 1, density_map.width do
       value = density_map:get(i, j)
       if value > 0 then
         occupied = feature_map:get(i, j) ~= nil
-        if not occupied and value >= rng:get_int(1, 100) then
-          elevation = elevation_map:get(i, j)
-          terrain_type = terrain_info:get_terrain_type(elevation)
-          if terrain_type == TerrainType.plains then
-            feature_map:set(i, j, pink_flower_name)
-          end
-        end
+				--[[ JELLY START ]]--
+				elevation = elevation_map:get(i, j)
+				terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
+
+				flower_object = self:_get_flora_object(flowers_by_terrain[terrain_type], value, rng, terrain_type, step)
+				
+				if flower_object then
+					feature_map:set(i, j, flower_object.jelly_id)
+				end
+				
+--~         if not occupied --[[and value >= rng:get_int(1, 100)]] then
+--~           elevation = elevation_map:get(i, j)
+--~           terrain_type = terrain_info:get_terrain_type(elevation)
+--~           if terrain_type == TerrainType.plains then
+--~             feature_map:set(i, j, pink_flower_name)
+--~           end
+--~         end
+				--[[ JELLY END ]]
       end
     end
   end
@@ -563,7 +577,91 @@ function Landscaper:_jelly_place_normal_tree(jelly_id, ...)
 	return self:_place_normal_tree(self._trees[jelly_id].entity_ref, ...)
 end
 
+function Landscaper:_jelly_place_flower(jelly_id, ...)
+	return self:_place_flower(self._flowers[jelly_id].entity_ref, ...)
+end
+
 function Landscaper:_initialize_function_table()
+	local function_table = {}
+	self._function_table = function_table
+	
+	self._trees, self._trees_by_terrain = self:_initialize_trees()
+	self._flowers_by_terrain = {}
+--~ 	self:_initialize_flowers()
+	
+	-- BACKWARDS COMPATIBILITY
+	function_table[berry_bush_name] = self._place_berry_bush
+  function_table[pink_flower_name] = self._place_flower
+end
+
+local function sort_by_density(a, b) return a.density > b.density end
+
+function Landscaper:_initialize_flowers()
+	-- Templates
+	local templates = jelly.util.build_classes(radiant.resources.load_json('jelly:index:flower_templates').flower_templates)
+	-- Index
+	local json = radiant.resources.load_json('jelly:index:flowers')
+	-- Tables
+	local flowers = {}
+	local flowers_by_terrain = {}
+	
+	local last_id = 1
+	local function_table = self._function_table
+	
+	-- Build the flowers
+	for _, flower in pairs(json.flowers) do
+		-- Create the scaffold
+		local parents = jelly.util.map(flower.template or {}, function(_, k) return templates[k] end)
+		
+		-- Build the flower
+		flower = jelly.util.mixinto(flower, parents)
+		
+		assert(flower.density, "density missing for flower #" .. _)
+		
+		-- Calculate the chance
+		if type(flower.chance) == 'string' then
+			local func, err = jelly.util.compile(flower.chance, { 'rng', 'terrain', 'step' })
+			if not func then
+				error('cannot compile flower function %q: %s', tree.chance, err)
+			end
+			
+			flower.chance = func
+		end
+		
+		-- Assign the ID
+		flower.jelly_id = string.format('jelly_#%d_flower', last_id)
+		last_id = last_id + 1
+		-- Place the function
+		function_table[flower.jelly_id] = self._jelly_place_flower
+		
+		-- Save it
+		flowers[flower.jelly_id] = flower
+		
+		for k, v in pairs(flower.terrain_types) do
+			flowers_by_terrain[v] = flowers_by_terrain[v] or { fallback = {}, normal = {} }
+			if flower.chance then
+				table.insert(flowers_by_terrain[v].normal, flower)
+			else
+				table.insert(flowers_by_terrain[v].fallback, flower)
+			end
+		end
+	end
+	
+	-- Sort.
+	for k, v in pairs(flowers_by_terrain) do
+		table.sort(v.normal, sort_by_density)
+		table.sort(v.fallback, sort_by_density)
+	end
+	
+	-- Assign
+	self._flowers = flowers
+	self._flowers_by_terrain = flowers_by_terrain
+end
+
+local function process_tree(tree)
+end
+
+function Landscaper:_initialize_trees()
 	-- Load the templates
 	local templates = jelly.util.build_classes(radiant.resources.load_json('jelly:index:tree_templates').tree_templates)
 	
@@ -575,7 +673,7 @@ function Landscaper:_initialize_function_table()
 	
 	local last_id = 1
 	
-	local function_table = {}
+	local function_table = self._function_table
 	
 	-- Build the trees.
 	for _, tree in pairs(json.trees) do
@@ -584,22 +682,21 @@ function Landscaper:_initialize_function_table()
 		
 		tree = jelly.util.mixinto(tree, parents)
 		
-		assert(tree.density, "density missing for #" .. _)
+		assert(tree.density, "density missing for tree #" .. _)
 		
 		-- Do we need to evaluate chance?
 		if type(tree.chance) == 'string' then
-			local func, err = loadstring('local terrain, step = ... return ' .. tree.chance)
+			local func, err = jelly.util.compile(tree.chance, { 'rng', 'terrain', 'step' })
+			
 			if not func then
-				log:error('cannot compile function %q: %s', tree.chance, err)
+				error('cannot compile tree function %q: %s', tree.chance, err)
 			end
 			
 			tree.chance = func
 		end
 		
-		tree.jelly_id = 'jelly_#' .. last_id .. '_tree'
+		tree.jelly_id = string.format('jelly_#%d_tree', last_id)
 		last_id = last_id + 1
-		
-		function_table[tree.jelly_id] = function() end
 
 		if tree.cluster then
 			assert(tree.cluster_exclusion_radius, "cluster_exclusion_radius missing for #" .. _)
@@ -613,65 +710,85 @@ function Landscaper:_initialize_function_table()
 		trees[tree.jelly_id] = tree
 		
 		for k, v in pairs(tree.terrain_types) do
+			-- Make sure the table exists
 			trees_by_terrain[v] = trees_by_terrain[v] or { fallback = {}, normal = {} }
+			local trt = trees_by_terrain[v]
+			local tb
+			-- Pick the proper category
 			if tree.chance then
-				table.insert(trees_by_terrain[v].normal, tree)
+				tb = trt.normal
 			else
-				table.insert(trees_by_terrain[v].fallback, tree)
+				tb = trt.fallback
 			end
+			
+			-- Group it by density
+			tb[tree.density] = tb[tree.density] or {}
+			table.insert(tb[tree.density], tree)
 		end
 	end
 	
 	-- Sort all tables.
-	local function sort_by_density(a, b) return a.density > b.density end
-	table.sort(trees, sort_by_density)
+--~ 	table.sort(trees, sort_by_density) -- trees is a hash table.
 	
 	for k, v in pairs(trees_by_terrain) do
-		table.sort(v.normal, sort_by_density)
-		table.sort(v.fallback, sort_by_density)
+		-- god I'm desperate
+		for _, tblName in pairs({ 'normal', 'fallback' }) do
+			local tbl = v[tblName]
+			local sortedTable = {}
+			
+			for density, trees in pairs(tbl) do
+				table.insert(sortedTable, { density = density, objects = trees })
+			end
+			
+			table.sort(sortedTable, sort_by_density)
+			v[tblName] = sortedTable
+		end
 	end
 	
-	self._trees = trees
-	self._trees_by_terrain = trees_by_terrain
+	-- Collect garbage stuff now to clean up the whole parsing.
+	collectgarbage('collect')
 	
-	self._function_table = function_table
-	
-	-- BACKWARDS COMPATIBILITY
-	function_table[berry_bush_name] = self._place_berry_bush
-  function_table[pink_flower_name] = self._place_flower
+	return trees, trees_by_terrain
 end
 
-local function accept_tree(tree, chance, terrain_type, step)
-	local t = type(tree.chance)
+local function accept_object(object, chance, ...)
+	local t = type(object.chance)
 	if t == 'function' then
-		local eval_chance = tree.chance(terrain_type, step)
+		local eval_chance = object.chance(...)
 		return eval_chance > chance
 	elseif t == 'number' then
-		return tree.chance > chance
+		return object.chance > chance
 	else
 		return true
 	end
 end
 
-function Landscaper:_get_tree_object(elevation, value, terrain_type, step)
-	-- Get the list of trees that are OK
-	local terrain_trees = self._trees_by_terrain[terrain_type]
+function Landscaper:_get_flora_object(objects, value, ...)
+	if not objects then
+		return
+	end
 	
-	if #terrain_trees.fallback > 0 then
-		-- Get the chance for this tree.
+	if #objects.normal > 0 then
+		-- Get the chance for this object.
 		local chance = self._rng:get_real(0, 1)
 		
-		for _, tree in pairs(terrain_trees.normal) do
-			if value >= tree.density and accept_tree(tree, chance, terrain_type, step) then
-				return tree
+		local candidates = nil
+		
+		for _, category in pairs(objects.normal) do
+			if value >= category.density then --and accept_object(object, chance, ...) then
+				for _, object in pairs(category.objects) do
+					if accept_object(object, chance, ...) then
+						return object
+					end
+				end
 			end
 		end
 	end
 	
-	if #terrain_trees.fallback > 0 then
-		for _, tree in pairs(terrain_trees.fallback) do
-			if value >= tree.density then
-				return tree
+	if #objects.fallback > 0 then
+		for _, category in pairs(objects.fallback) do
+			if value >= category.density then --and accept_object(object, chance, ...) then
+				return category.objects[1]
 			end
 		end
 	end
@@ -680,7 +797,7 @@ function Landscaper:_get_tree_object(elevation, value, terrain_type, step)
 end
 
 -- Not necessary.
-function Landscaper:_get_tree_size() end
+--~ function Landscaper:_get_tree_size() end
 
 -- get_tree_type already dealt with this.
 --~ function Landscaper:_get_tree_name(tree_type, tree_size) return tree_type end

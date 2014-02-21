@@ -5,6 +5,9 @@
 	
 	"aliases" : {
 		"index:trees" : "file(data/world_generation/trees.json)",
-		"index:tree_templates" : "file(data/world_generation/tree_templates.json)"
+		"index:tree_templates" : "file(data/world_generation/tree_templates.json)",
+		
+		"index:flowers" : "file(data/world_generation/flowers.json)",
+		"index:flower_templates" : "file(data/world_generation/flower_templates.json)"
 	}
 }
