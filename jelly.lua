@@ -179,6 +179,21 @@ function util.contains(tbl, value)
 	return false
 end
 
+--! desc Compiles `str` into a function, if any. `args` is a table of string which contains the function's passed arguments.
+--! param string str Function's return value.
+--! param table args Table containing the name of the passed arguments, as strings.
+--! returns function if the compilation succeeded, false and the error message otherwise
+--! remarks Because the "return" statement of the function is given, this may only be used for very simple calculations.
+--! remarks Its real use is to have json defined short functions for attributes, chances or simple calculations.
+function util.compile(str, args)
+	if not str then
+		return nil, "str is nil"
+	end
+	
+	local argStr = table.concat(args, ',')
+	return loadstring(string.format('local %s=... return %s', table.concat(args, ','), str))
+end
+
 local linq = {}
 jelly.linq = linq
 
