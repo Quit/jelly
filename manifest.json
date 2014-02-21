@@ -17,6 +17,7 @@
 		"template:oak" : "file(data/world_generation/tree_templates/oak.json)",
 		
 		"index:flowers" : "file(data/world_generation/flowers.json)",
-		"index:flower_templates" : "file(data/world_generation/flower_templates.json)"
+		
+		"template:default_flower" : "file(data/world_generation/flower_templates/default_flower.json)"
 	}
 }

@@ -593,88 +593,23 @@ function Landscaper:_initialize_tree(object)
 	end		
 end
 
+function Landscaper:_initialize_flower(object)
+	self._function_table[object.jelly_id] = self._jelly_place_flower
+end
+
 function Landscaper:_initialize_function_table()
 	local function_table = {}
 	self._function_table = function_table
 	
 	self._trees, self._trees_by_terrain = self:_initialize_objects('jelly:index:trees', 'trees', '_tree', self._initialize_tree) -- _tree is required for :is_tree_name
-	
-	PrintTable(self._trees, self._trees_by_terrain)
-	
-	self._flowers_by_terrain = {}
---~ 	self:_initialize_flowers()
+	self._flowers, self._flowers_by_terrain = self:_initialize_objects('jelly:index:flowers', 'flowers', '_flower', self._initialize_flower) -- _flower is not required to my knowledge
 	
 	-- BACKWARDS COMPATIBILITY
 	function_table[berry_bush_name] = self._place_berry_bush
-  function_table[pink_flower_name] = self._place_flower
+--~   function_table[pink_flower_name] = self._place_flower
 end
 
 local function sort_by_density(a, b) return a.density > b.density end
-
-function Landscaper:_initialize_flowers()
-	-- Templates
-	local templates = jelly.util.build_classes(radiant.resources.load_json('jelly:index:flower_templates').flower_templates)
-	-- Index
-	local json = radiant.resources.load_json('jelly:index:flowers')
-	-- Tables
-	local flowers = {}
-	local flowers_by_terrain = {}
-	
-	local last_id = 1
-	local function_table = self._function_table
-	
-	-- Build the flowers
-	for _, flower in pairs(json.flowers) do
-		-- Create the scaffold
-		local parents = jelly.util.map(flower.template or {}, function(_, k) return templates[k] end)
-		
-		-- Build the flower
-		flower = jelly.util.mixinto(flower, parents)
-		
-		assert(flower.density, "density missing for flower #" .. _)
-		
-		-- Calculate the chance
-		if type(flower.chance) == 'string' then
-			local func, err = jelly.util.compile(flower.chance, { 'rng', 'terrain', 'step' })
-			if not func then
-				error('cannot compile flower function %q: %s', tree.chance, err)
-			end
-			
-			flower.chance = func
-		end
-		
-		-- Assign the ID
-		flower.jelly_id = string.format('jelly_#%d_flower', last_id)
-		last_id = last_id + 1
-		-- Place the function
-		function_table[flower.jelly_id] = self._jelly_place_flower
-		
-		-- Save it
-		flowers[flower.jelly_id] = flower
-		
-		for k, v in pairs(flower.terrain_types) do
-			flowers_by_terrain[v] = flowers_by_terrain[v] or { fallback = {}, normal = {} }
-			if flower.chance then
-				table.insert(flowers_by_terrain[v].normal, flower)
-			else
-				table.insert(flowers_by_terrain[v].fallback, flower)
-			end
-		end
-	end
-	
-	-- Sort.
-	for k, v in pairs(flowers_by_terrain) do
-		table.sort(v.normal, sort_by_density)
-		table.sort(v.fallback, sort_by_density)
-	end
-	
-	-- Assign
-	self._flowers = flowers
-	self._flowers_by_terrain = flowers_by_terrain
-end
-
-local function process_tree(tree)
-end
 
 --! desc Loads `index_name` containing the definitions in an array named `elements_name`.
 --! desc Each element's id will be suffixed with `name_suffix` to allow "checks" by the game.
