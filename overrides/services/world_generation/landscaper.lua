@@ -169,9 +169,7 @@ function Landscaper:mark_trees(elevation_map, feature_map)
           terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
 					-- Get the tree name directly.
 					--[[ JELLY START ]]--
-					
-				
---~           tree_type = self:_get_tree_type(terrain_type, step)
+          tree_type = self:_get_tree_type(terrain_type, step)
 --~           if terrain_type ~= TerrainType.mountains then
 --~             tree_density = normal_tree_density
 --~           else
@@ -304,13 +302,22 @@ function Landscaper:mark_berry_bushes(elevation_map, feature_map)
   local perturbation_grid = self._perturbation_grid
   local noise_map, density_map = self:_get_filter_buffers(feature_map.width, feature_map.height)
   local value, occupied, elevation, terrain_type
+	
+	--[[ JELLY START ]]--
+	local bushes_by_terrain = self._bushes_by_terrain
+	local bush_object, step
+	--[[ JELLY END ]]--
+	
   local function noise_fn(i, j)
     local mean = -50
     local std_dev = 30
     local feature = feature_map:get(i, j)
 
     if self:is_tree_name(feature) then
-      mean = mean + 100
+			--[[ JELLY START ]]--
+			-- Tweak the mean a bit...
+      mean = mean + 115
+			--[[ JELYL END ]]--
     end
     return rng:get_gaussian(mean, std_dev)
   end
@@ -325,10 +332,17 @@ function Landscaper:mark_berry_bushes(elevation_map, feature_map)
         occupied = feature_map:get(i, j) ~= nil
         if not occupied then
           elevation = elevation_map:get(i, j)
-          terrain_type = terrain_info:get_terrain_type(elevation)
-          if terrain_type ~= TerrainType.mountains then
-            feature_map:set(i, j, berry_bush_name)
-          end
+					
+					--[[ START JELLY ]]--
+          terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
+					
+					bush_object = self:_get_flora_object(bushes_by_terrain[terrain_type], value, rng, terrain_type, step)
+
+					if bush_object then
+						feature_map:set(i, j, bush_object.jelly_id)
+					end
+					
+					--[[ END JELLY ]]--
         end
       end
     end
@@ -336,6 +350,7 @@ function Landscaper:mark_berry_bushes(elevation_map, feature_map)
 end
 
 function Landscaper:_place_berry_bush(feature_name, i, j, tile_map, place_item)
+--~ 	log:info('%d/%d: place %q', i, j, feature_name)
   local terrain_info = self._terrain_info
   local perturbation_grid = self._perturbation_grid
   local item_spacing = math.floor(perturbation_grid.grid_spacing * 0.33)
@@ -582,6 +597,10 @@ function Landscaper:_jelly_place_flower(jelly_id, ...)
 	return self:_place_flower(self._flowers[jelly_id].entity_ref, ...)
 end
 
+function Landscaper:_jelly_place_berry_bush(jelly_id, ...)
+	return self:_place_berry_bush(self._bushes[jelly_id].entity_ref, ...)
+end
+
 function Landscaper:_initialize_tree(object)
 	if object.cluster then
 		assert(object.cluster_exclusion_radius, "cluster_exclusion_radius missing for " .. object.jelly_id)
@@ -597,15 +616,23 @@ function Landscaper:_initialize_flower(object)
 	self._function_table[object.jelly_id] = self._jelly_place_flower
 end
 
-function Landscaper:_initialize_function_table()
-	local function_table = {}
-	self._function_table = function_table
+function Landscaper:_initialize_bush(object)
+	self._function_table[object.jelly_id] = self._jelly_place_berry_bush
+end
+
+local old_func_table = Landscaper._initialize_function_table
+
+function Landscaper:_initialize_function_table(...)
+--~ 	old_func_table(self, ...)
+--~ 	local function_table = {}
+	self._function_table = self._function_table or {}
 	
 	self._trees, self._trees_by_terrain = self:_initialize_objects('jelly:index:trees', 'trees', '_tree', self._initialize_tree) -- _tree is required for :is_tree_name
 	self._flowers, self._flowers_by_terrain = self:_initialize_objects('jelly:index:flowers', 'flowers', '_flower', self._initialize_flower) -- _flower is not required to my knowledge
+	self._bushes, self._bushes_by_terrain = self:_initialize_objects('jelly:index:bushes', 'bushes', '_bush', self._initialize_bush)
 	
 	-- BACKWARDS COMPATIBILITY
-	function_table[berry_bush_name] = self._place_berry_bush
+--~ 	function_table[berry_bush_name] = self._place_berry_bush
 --~   function_table[pink_flower_name] = self._place_flower
 end
 

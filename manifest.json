@@ -18,6 +18,10 @@
 		
 		"index:flowers" : "file(data/world_generation/flowers.json)",
 		
-		"template:default_flower" : "file(data/world_generation/flower_templates/default_flower.json)"
+		"template:default_flower" : "file(data/world_generation/flower_templates/default_flower.json)",
+		
+		"index:bushes" : "file(data/world_generation/bushes.json)",
+		
+		"template:default_bush" : "file(data/world_generation/bush_templates/default_bush.json)"
 	}
 }
