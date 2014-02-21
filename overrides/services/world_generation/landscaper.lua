@@ -27,6 +27,7 @@ local generic_vegetaion_name = "vegetation"
 --[[ JELLY START ]]--
 local generic_vegetation_name = generic_vegetaion_name
 local jelly = radiant.mods.require('jelly.jelly')
+local load_class, mixinto = jelly.util.load_class, jelly.util.mixinto
 --[[ JELLY END ]]--
 
 local boulder_name = "boulder"
@@ -581,11 +582,25 @@ function Landscaper:_jelly_place_flower(jelly_id, ...)
 	return self:_place_flower(self._flowers[jelly_id].entity_ref, ...)
 end
 
+function Landscaper:_initialize_tree(object)
+	if object.cluster then
+		assert(object.cluster_exclusion_radius, "cluster_exclusion_radius missing for " .. object.jelly_id)
+		assert(object.cluster_factor, "cluster_factor missing for " .. object.jelly_id)
+		assert(object.cluster_density, "cluster_density missing for " .. object.jelly_id)
+		self._function_table[object.jelly_id] = self._jelly_place_small_tree
+	else
+		self._function_table[object.jelly_id] = self._jelly_place_normal_tree
+	end		
+end
+
 function Landscaper:_initialize_function_table()
 	local function_table = {}
 	self._function_table = function_table
 	
-	self._trees, self._trees_by_terrain = self:_initialize_trees()
+	self._trees, self._trees_by_terrain = self:_initialize_objects('jelly:index:trees', 'trees', '_tree', self._initialize_tree) -- _tree is required for :is_tree_name
+	
+	PrintTable(self._trees, self._trees_by_terrain)
+	
 	self._flowers_by_terrain = {}
 --~ 	self:_initialize_flowers()
 	
@@ -661,83 +676,79 @@ end
 local function process_tree(tree)
 end
 
-function Landscaper:_initialize_trees()
-	-- Load the templates
-	local templates = jelly.util.build_classes(radiant.resources.load_json('jelly:index:tree_templates').tree_templates)
+--! desc Loads `index_name` containing the definitions in an array named `elements_name`.
+--! desc Each element's id will be suffixed with `name_suffix` to allow "checks" by the game.
+--! param string index_name Name/Path to the json containing the object definitions.
+--! param string elements_name Key name that contains the definitions in the json.
+--! param string name_suffix Suffix attached to each pseudo-ID that is put into the feature map.
+--! param function process_func Function that is called with each object after it has been roughly initialized. Passed is the landscaper and the object.
+function Landscaper:_initialize_objects(index_name, elements_name, name_suffix, process_func)
+	name_suffix = name_suffix or ''
 	
 	-- Load the index
-	local json = radiant.resources.load_json('jelly:index:trees')
+	local json = radiant.resources.load_json(index_name)
 
-	local trees = {}
-	local trees_by_terrain = {}
+	local objects = {}
+	local objects_by_terrain = {}
 	
 	local last_id = 1
 	
-	local function_table = self._function_table
-	
-	-- Build the trees.
-	for _, tree in pairs(json.trees) do
+	-- Build the objects.
+	for _, object in pairs(json[elements_name]) do
 		-- Map the parents, if any
-		local parents = jelly.util.map(tree.template or {}, function(_, k) return templates[k] end)
+		local parents = jelly.util.map(object.template or {}, function(_, k) return load_class(k, 'base') end)
 		
-		tree = jelly.util.mixinto(tree, parents)
+		object = jelly.util.mixinto(object, parents)
 		
-		assert(tree.density, "density missing for tree #" .. _)
+		assert(object.density, "density missing for object #" .. _)
 		
 		-- Do we need to evaluate chance?
-		if type(tree.chance) == 'string' then
-			local func, err = jelly.util.compile(tree.chance, { 'rng', 'terrain', 'step' })
+		if type(object.chance) == 'string' then
+			local func, err = jelly.util.compile(object.chance, { 'rng', 'terrain', 'step' })
 			
 			if not func then
-				error('cannot compile tree function %q: %s', tree.chance, err)
+				error('cannot compile object function %q: %s', object.chance, err)
 			end
 			
-			tree.chance = func
+			object.chance = func
 		end
 		
-		tree.jelly_id = string.format('jelly_#%d_tree', last_id)
+		object.jelly_id = string.format('jelly_#%d%s', last_id, name_suffix)
 		last_id = last_id + 1
 
-		if tree.cluster then
-			assert(tree.cluster_exclusion_radius, "cluster_exclusion_radius missing for #" .. _)
-			assert(tree.cluster_factor, "cluster_factor missing for #" .. _)
-			assert(tree.cluster_density, "cluster_density missing for #" .. _)
-			function_table[tree.jelly_id] = self._jelly_place_small_tree
-		else
-			function_table[tree.jelly_id] = self._jelly_place_normal_tree
-		end
+		process_func(self, object)
 		
-		trees[tree.jelly_id] = tree
+		objects[object.jelly_id] = object
 		
-		for k, v in pairs(tree.terrain_types) do
+		for k, v in pairs(object.terrain_types) do
 			-- Make sure the table exists
-			trees_by_terrain[v] = trees_by_terrain[v] or { fallback = {}, normal = {} }
-			local trt = trees_by_terrain[v]
+			objects_by_terrain[v] = objects_by_terrain[v] or { fallback = {}, normal = {} }
+			local trt = objects_by_terrain[v]
 			local tb
 			-- Pick the proper category
-			if tree.chance then
+			if object.chance then
 				tb = trt.normal
 			else
 				tb = trt.fallback
 			end
 			
 			-- Group it by density
-			tb[tree.density] = tb[tree.density] or {}
-			table.insert(tb[tree.density], tree)
+			tb[object.density] = tb[object.density] or {}
+			table.insert(tb[object.density], object)
 		end
 	end
 	
 	-- Sort all tables.
---~ 	table.sort(trees, sort_by_density) -- trees is a hash table.
+--~ 	table.sort(objects, sort_by_density) -- objects is a hash table.
 	
-	for k, v in pairs(trees_by_terrain) do
+	for k, v in pairs(objects_by_terrain) do
 		-- god I'm desperate
 		for _, tblName in pairs({ 'normal', 'fallback' }) do
 			local tbl = v[tblName]
 			local sortedTable = {}
 			
-			for density, trees in pairs(tbl) do
-				table.insert(sortedTable, { density = density, objects = trees })
+			for density, objects in pairs(tbl) do
+				table.insert(sortedTable, { density = density, objects = objects })
 			end
 			
 			table.sort(sortedTable, sort_by_density)
@@ -748,7 +759,7 @@ function Landscaper:_initialize_trees()
 	-- Collect garbage stuff now to clean up the whole parsing.
 	collectgarbage('collect')
 	
-	return trees, trees_by_terrain
+	return objects, objects_by_terrain
 end
 
 local function accept_object(object, chance, ...)

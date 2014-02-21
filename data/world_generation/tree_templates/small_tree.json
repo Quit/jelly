@@ -1,0 +1,9 @@
+{
+	"base" : [ "jelly:template:default_tree" ],
+	"density" : 0,
+	"cluster" : true,
+	"cluster_density" : 0.5,
+	"cluster_factor" : 0.5,
+	"vegetation_chance" : 0.2,
+	"cluster_exclusion_radius" : 2
+}
