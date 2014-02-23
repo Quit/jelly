@@ -314,10 +314,7 @@ function Landscaper:mark_berry_bushes(elevation_map, feature_map)
     local feature = feature_map:get(i, j)
 
     if self:is_tree_name(feature) then
-			--[[ JELLY START ]]--
-			-- Tweak the mean a bit...
-      mean = mean + 115
-			--[[ JELYL END ]]--
+      mean = mean + 100
     end
     return rng:get_gaussian(mean, std_dev)
   end
