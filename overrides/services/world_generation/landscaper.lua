@@ -58,7 +58,6 @@ local generic_vegetaion_name = "vegetation"
 
 --[[ JELLY START ]]--
 local generic_vegetation_name = generic_vegetaion_name
-local jelly = radiant.mods.require('jelly.jelly')
 local load_class, mixinto = jelly.util.load_class, jelly.util.mixinto
 --[[ JELLY END ]]--
 
@@ -687,7 +686,7 @@ function Landscaper:_initialize_objects(index_name, elements_name, name_suffix, 
 		-- Map the parents, if any
 		local parents = jelly.util.map(object.template or {}, function(_, k) return load_class(k, 'base') end)
 		
-		object = jelly.util.mixinto(object, parents)
+		object = mixinto(object, parents)
 		
 		assert(tonumber(object.minimum_density), "density missing for object #" .. _)
 		object.maximum_density = object.maximum_density or math.huge
