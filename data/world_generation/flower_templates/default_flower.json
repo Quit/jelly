@@ -1,4 +1,8 @@
 {
-	"density" : 0,
+	"minimum_density" : 0,
+	"maximum_density" : 0,
+	
+	"pool_weight" : 100,
+	
 	"chance" : 0.05
 }

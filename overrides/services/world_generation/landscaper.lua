@@ -350,7 +350,6 @@ function Landscaper:mark_berry_bushes(elevation_map, feature_map)
 end
 
 function Landscaper:_place_berry_bush(feature_name, i, j, tile_map, place_item)
---~ 	log:info('%d/%d: place %q', i, j, feature_name)
   local terrain_info = self._terrain_info
   local perturbation_grid = self._perturbation_grid
   local item_spacing = math.floor(perturbation_grid.grid_spacing * 0.33)
@@ -636,7 +635,7 @@ function Landscaper:_initialize_function_table(...)
 --~   function_table[pink_flower_name] = self._place_flower
 end
 
-local function sort_by_density(a, b) return a.density > b.density end
+local function sort_by_density(a, b) return a.minimum_density > b.minimum_density end
 
 --! desc Loads `index_name` containing the definitions in an array named `elements_name`.
 --! desc Each element's id will be suffixed with `name_suffix` to allow "checks" by the game.
@@ -662,7 +661,11 @@ function Landscaper:_initialize_objects(index_name, elements_name, name_suffix, 
 		
 		object = jelly.util.mixinto(object, parents)
 		
-		assert(object.density, "density missing for object #" .. _)
+		assert(tonumber(object.minimum_density), "density missing for object #" .. _)
+		object.maximum_density = object.maximum_density or math.huge
+		
+		assert(tonumber(object.pool_weight), "pool_weight missing for object #" .. _)
+		assert(object.pool_weight >= 0, "pool_weight must be >= 0 for #" .. _)
 		
 		-- Do we need to evaluate chance?
 		if type(object.chance) == 'string' then
@@ -695,8 +698,8 @@ function Landscaper:_initialize_objects(index_name, elements_name, name_suffix, 
 			end
 			
 			-- Group it by density
-			tb[object.density] = tb[object.density] or {}
-			table.insert(tb[object.density], object)
+			tb[object.minimum_density] = tb[object.minimum_density] or {}
+			table.insert(tb[object.minimum_density], object)
 		end
 	end
 	
@@ -710,7 +713,7 @@ function Landscaper:_initialize_objects(index_name, elements_name, name_suffix, 
 			local sortedTable = {}
 			
 			for density, objects in pairs(tbl) do
-				table.insert(sortedTable, { density = density, objects = objects })
+				table.insert(sortedTable, { minimum_density = density, objects = objects })
 			end
 			
 			table.sort(sortedTable, sort_by_density)
@@ -721,6 +724,7 @@ function Landscaper:_initialize_objects(index_name, elements_name, name_suffix, 
 	-- Collect garbage stuff now to clean up the whole parsing.
 	collectgarbage('collect')
 	
+	PrintTable(objects)
 	return objects, objects_by_terrain
 end
 
@@ -736,37 +740,68 @@ local function accept_object(object, chance, ...)
 	end
 end
 
+function Landscaper:_get_candidate(candidates, pool_sum)
+	if #candidates == 0 then
+		return nil
+	end
+	
+	local p = self._rng:get_real(0, pool_sum)
+	local ap = 0
+	
+	for _, candidate in pairs(candidates) do
+		ap = ap + candidate.pool_weight
+		if ap >= p then
+			return candidate
+		end
+	end
+	
+	-- Errr.... I'm not sure whether get_real is inclusive or exclusive, so... let's assume the worst.
+	return candidates[#candidates]
+end
+
 function Landscaper:_get_flora_object(objects, value, ...)
 	if not objects then
 		return
 	end
 	
+	local candidates = {}
+	local candidateSum = 0
+	local candidate
+	
 	if #objects.normal > 0 then
 		-- Get the chance for this object.
 		local chance = self._rng:get_real(0, 1)
 		
-		local candidates = nil
-		
+		-- Check all "normal" entries.
 		for _, category in pairs(objects.normal) do
-			if value >= category.density then --and accept_object(object, chance, ...) then
+			-- If the minimum density is high enough...
+			if value >= category.minimum_density then
+				-- Check each object in the list
 				for _, object in pairs(category.objects) do
-					if accept_object(object, chance, ...) then
-						return object
+					-- Accepted: maximum density < density AND chance evaluated to true
+					if value < object.maximum_density and accept_object(object, chance, ...) then
+						table.insert(candidates, object)
+						candidateSum = candidateSum + object.pool_weight
 					end
 				end
 			end
 		end
 	end
 	
-	if #objects.fallback > 0 then
+	if #candidates == 0 and #objects.fallback > 0 then
 		for _, category in pairs(objects.fallback) do
-			if value >= category.density then --and accept_object(object, chance, ...) then
-				return category.objects[1]
+			if value >= category.minimum_density then
+				for _, object in pairs(category.objects) do
+					if value < object.maximum_density then
+						table.insert(candidates, object)
+						candidateSum = candidateSum + object.pool_weight
+					end
+				end
 			end
 		end
 	end
 	
-	return nil
+	return self:_get_candidate(candidates, candidateSum)
 end
 
 -- Not necessary.

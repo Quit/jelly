@@ -1,4 +1,6 @@
 {
 	"base" : [ "jelly:template:default_tree" ],
-	"density" : 4
+	
+	"minimum_density" : 4,
+	"maximum_density" : 20
 }
