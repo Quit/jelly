@@ -184,7 +184,7 @@ function Landscaper:mark_trees(elevation_map, feature_map)
 --~           tree_name = get_tree_name(tree_type, tree_size)
 				
 					tree_object = self:_get_flora_object(trees_by_terrain[terrain_type], value, rng, terrain_type, step)
-					if tree_object and (not tree_object.vegetation_chance or tree_object.vegetation_chance > rng:get_real(0, 1)) then
+					if tree_object and (not tree_object.vegetation_chance or tree_object.vegetation_chance < rng:get_real(0, 1)) then
 						tree_name = tree_object.jelly_id
 					else
 						tree_name = generic_vegetation_name
