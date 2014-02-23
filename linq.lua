@@ -2,7 +2,6 @@
 The MIT License (MIT)
 
 Copyright (c) 2014 RepeatPan
-excluding parts that were written by Radiant Entertainment
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,11 +22,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=============================================================================]
 
-local log = radiant.log.create_logger('jelly')
+local linq = {}
 
-jelly = {}
-jelly.util = require('util')
-jelly.resources = require('resources')
-jelly.linq = require('linq')
+-- Localise.
+local next = next
 
-return jelly
+--! desc Maps `tbl` using `func`. Lazy evaluated.
+--! param table tbl Table that should be mapped
+--! param function func Function that receives two arguments (`key`, `value`) and returns the new element.
+--! returns lua iterator
+--! EXPERIMENTAL
+function linq.map_pairs(tbl, func)
+	local map_next = function(tbl, index)
+		local k, v = next(tbl, index)
+		
+		if k == nil then
+			return nil, nil
+		end
+		
+		return k, func(k, v)
+	end
+	
+	return map_next, tbl, nil	
+end
+
+--! desc Picks only certain elements from `tbl` by evaluating them using `func`
+--! param table tbl Table that should be searched for
+--! param function func Function that decides whether an element is taken or not
+--! returns lua iterator
+--! EXPERIMENTAL
+function linq.where_pairs(tbl, func)
+	local grep_next = function(tbl, k)
+		local v
+		repeat
+			k, v = next(tbl, k)
+		until not k or func(k, v)
+		
+		return k, v
+	end
+	
+	return grep_next, tbl, nil
+end
+
+return linq
