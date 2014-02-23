@@ -23,15 +23,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=============================================================================]
 
-local log = radiant.log.create_logger('jelly')
-log:info('Loading Jelly.')
+--! realm jelly
+local sh = {}
 
-jelly = {}
-jelly.util = require('util')
-jelly.resources = require('resources')
-jelly.linq = require('linq')
-jelly.sh = require('sh')
+--! desc Requires a file from within Stonehearth. For the lazy.
+--! param string path Path to the file inside stonehearth/. No file extension.
+--! returns Whatever the loaded file returns - usually a class or an object.
+function sh.require(path)
+	return radiant.mods.require('stonehearth.' .. path)
+end
 
-log:info('Jelly loaded.')
+-- Define a list of classes we might want to use, including name.
+local classes = 
+{
+	TerrainType = "services.world_generation.terrain_type",
+	TerrainInfo = "services.world_generation.terrain_info",
+	Array2D = "services.world_generation.array_2D",
+	MathFns = "services.world_generation.math.math_fns",
+	FilterFns = "services.world_generation.filter.filter_fns",
+	PerturbationGrid = "services.world_generation.perturbation_grid",
+	BoulderGenerator = "services.world_generation.boulder_generator"
+}
 
-return jelly
+for k, v in pairs(classes) do
+	sh[k] = sh.require(v)
+end
+
+return sh
