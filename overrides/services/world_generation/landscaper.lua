@@ -579,7 +579,6 @@ function Landscaper:_yield()
   end
 end
 
-
 --[[ START JELLY CODE ]]--
 function Landscaper:_jelly_place_small_tree(jelly_id, ...)
 	return self:_place_small_tree(self._trees[jelly_id].entity_ref, ...)
@@ -729,7 +728,7 @@ local function accept_object(object, chance, ...)
 	local t = type(object.chance)
 	if t == 'function' then
 		local eval_chance = object.chance(...)
-		return eval_chance > chance
+		return eval_chance < chance
 	elseif t == 'number' then
 		return object.chance > chance
 	else

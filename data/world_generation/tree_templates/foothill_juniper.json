@@ -1,4 +1,4 @@
 {
-	"chance" : "step == 2 and 0.75 or 0.25",
+	"chance" : "step == 2 and 0.25 or 0.75",
 	"terrain_types" : [ "foothills" ]
 }
