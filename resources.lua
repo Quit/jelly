@@ -25,6 +25,7 @@ SOFTWARE.
 local radiant = radiant
 local type, error = type, error
 
+--! realm jelly
 local resources = {}
 
 --! desc If `name` is a table, `name` is returned. If `name` is a string, it is tried to `radiant.resources.load_json`.
