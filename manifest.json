@@ -5,6 +5,7 @@
 	
 	"aliases" : {
 		"index:trees" : "file(data/world_generation/trees.json)",
+		"generator:trees" : "file(generators/tree_generator.lua)",
 		
 		"template:default_tree" : "file(data/world_generation/tree_templates/default_tree.json)",
 		

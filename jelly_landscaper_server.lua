@@ -23,9 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=============================================================================]
 
-local log = radiant.log.create_logger("landscaper")
 
-require('jelly')
+local jelly = require('jelly')
+local TerrainType = radiant.mods.require("stonehearth.services.world_generation.terrain_type")
+local log = radiant.log.create_logger("server")
 
 local MOD = class()
 
@@ -34,51 +35,62 @@ function MOD:__init()
 end
 
 function MOD:_patch_all()
+	log:info('Patch stuff.')
 	self:_patch('stonehearth.services.world_generation.landscaper', 'jelly.overrides.services.world_generation.landscaper')
 end
 
-	function MOD:_patch(original_path, patched_path)
-		log:info('patch %s -> %s', original_path, patched_path)
-		-- Require both files
-		log:spam('require %s', original_path)
-		local source = radiant.mods.require(original_path)
-		
-		-- Get the source mod
-		local original_mod = original_path:match('^(.-%.)')
-		
-		local old_require = require
-		
-		function require(path)
-			if path:sub(-4) == '.lua' then
-				path = path:sub(1, -4)
-			end
-			
-			log:spam('include %s (translated to %s%s)', path, original_mod, path)
-			
-			return radiant.mods.require(original_mod .. path)
+function MOD:_patch(original_path, patched_path)
+	log:info('patch %q -> %q', original_path, patched_path)
+	-- Require both files
+	log:spam('require source file %q', original_path)
+	local source = radiant.mods.require(original_path)
+	
+	-- Get the source mod
+	local original_mod = original_path:match('^(.-%.)')
+	
+	local old_require = require
+	
+	function require(path)
+		if path:sub(-4) == '.lua' then
+			path = path:sub(1, -4)
 		end
 		
-		local patch = radiant.mods.require(patched_path)
-		
-		require = old_require
-			
-		if not patch then
-			log:error('cannot find patch target %s!', patched_path)
-			return
+		if path:sub(1, 5) == 'jelly' then
+			return radiant.mods.require(path)
 		end
 		
-		-- Clear source
-		for k, v in pairs(source) do
-			source[k] = nil
-		end
+		log:spam('include %q (translated to %s%s)', path, original_mod, path)
 		
-		-- Create the patch
-		for k, v in pairs(patch) do
-			source[k] = v
-		end
-		
-		-- Set the metatable
-		setmetatable(source, getmetatable(patch))
+		return radiant.mods.require(original_mod .. path)
 	end
+	
+	log:spam('require patch file %q', patched_path)
+	local patch = radiant.mods.require(patched_path)
+	
+	require = old_require
+		
+	if not patch then
+		error('cannot find patch file '.. patched_path .. ' _or_ there was an error')
+		return
+	end
+	
+	-- Clear source
+	for k, v in pairs(source) do
+		source[k] = nil
+	end
+	
+	-- Create the patch
+	for k, v in pairs(patch) do
+		source[k] = v
+	end
+	
+	-- Set the metatable
+	setmetatable(source, getmetatable(patch))
+end
+
+-- Because of Stonehearths... rather undesirable mod loading process, we alias those who don't require() us.
+function MOD:__get(key)
+	return rawget(jelly, key)
+end
 
 return MOD()

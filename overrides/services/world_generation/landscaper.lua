@@ -58,7 +58,10 @@ local generic_vegetaion_name = "vegetation"
 
 --[[ JELLY START ]]--
 local generic_vegetation_name = generic_vegetaion_name
+
 local load_class, mixinto = jelly.util.load_class, jelly.util.mixinto
+local GenericLandscaper = require('jelly.generators.generic_landscaper')
+
 --[[ JELLY END ]]--
 
 local boulder_name = "boulder"
@@ -139,105 +142,50 @@ end
 
 -- Marks the trees
 function Landscaper:mark_trees(elevation_map, feature_map)
-  local rng = self._rng
-  local terrain_info = self._terrain_info
-  local normal_tree_density = 0.8
-  local mountains_size_modifier = 0.1
-  local mountains_density_base = 0.4
-  local mountains_density_peaks = 0.1
-  local noise_map, density_map = self:_get_filter_buffers(feature_map.width, feature_map.height)
-  local tree_name, tree_type, tree_size, occupied, value, elevation, terrain_type, step, tree_density
-	
 	--[[ START JELLY ]]--
-	local trees_by_terrain = self._trees_by_terrain
-	local tree_object
+	-- All old code has been removed or completely re-factored.
+	local generator = self:_create_generator(self._trees_by_terrain, 'filter_2D_0125', 10, elevation_map, feature_map)
+
+	-- Except this. The noise function is pretty much the same.
+	generator:set_noise_function(function(i, j, args)
+		local rng, noise_map, density_map, elevation_map, terrain_info = args.rng, args.noise_map, args.density_map, args.elevation_map, args.terrain_info
+
+		local mean = 0
+		local std_dev = 100
+		
+		if noise_map:is_boundary(i, j) then
+			mean = mean - 20
+		end
+		
+		local elevation = elevation_map:get(i, j)
+		local terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
+		
+		if terrain_type == TerrainType.mountains then
+			if step <= 2 then
+				mean = mean + 50
+				std_dev = 0
+			else
+				std_dev = std_dev * 0.3
+			end
+		elseif terrain_type == TerrainType.plains then
+			if step == 2 then
+				mean = mean - 5
+			else
+				mean = mean - 100
+			end
+		elseif step == 2 then
+			mean = mean + 5
+			std_dev = std_dev * 0.3
+		else
+			std_dev = std_dev * 0.3
+		end
+		return rng:get_gaussian(mean, std_dev)
+	end
+	)
+	
+	-- Return the generator.
+	generator:mark()
 	--[[ END JELLY ]]--
-	
-  local function noise_fn(i, j)
-    local mean = 0
-    local std_dev = 100
-    if noise_map:is_boundary(i, j) then
-      mean = mean - 20
-    end
-    local elevation = elevation_map:get(i, j)
-    local terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
-    if terrain_type == TerrainType.mountains then
-      if step <= 2 then
-        mean = mean + 50
-        std_dev = 0
-      else
-        std_dev = std_dev * 0.3
-      end
-    elseif terrain_type == TerrainType.plains then
-      if step == 2 then
-        mean = mean - 5
-      else
-        mean = mean - 100
-      end
-    elseif step == 2 then
-      mean = mean + 5
-      std_dev = std_dev * 0.3
-    else
-      std_dev = std_dev * 0.3
-    end
-    return rng:get_gaussian(mean, std_dev)
-  end
-	
-  noise_map:fill_ij(noise_fn)
-  FilterFns.filter_2D_0125(density_map, noise_map, noise_map.width, noise_map.height, 10)
-	
-  for j = 1, density_map.height do
-    for i = 1, density_map.width do
-      occupied = feature_map:get(i, j) ~= nil
-			
-			-- Not occupied
-      if not occupied then
-				-- Get the density
-        value = density_map:get(i, j)
-				
-        if value > 0 then
-          elevation = elevation_map:get(i, j)
-          terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
-					-- Get the tree name directly.
-					--[[ JELLY START ]]--
-          tree_type = self:_get_tree_type(terrain_type, step)
---~           if terrain_type ~= TerrainType.mountains then
---~             tree_density = normal_tree_density
---~           else
---~             value = value * mountains_size_modifier
---~             if step == 1 then
---~               tree_density = mountains_density_base
---~             else
---~               tree_density = mountains_density_peaks
---~             end
---~           end
---~           tree_size = self:_get_tree_size(value)
---~           tree_name = get_tree_name(tree_type, tree_size)
-				
-					tree_object = self:_get_flora_object(trees_by_terrain[terrain_type], value, rng, terrain_type, step)
-					if tree_object and (not tree_object.vegetation_chance or tree_object.vegetation_chance < rng:get_real(0, 1)) then
-						tree_name = tree_object.jelly_id
-					else
-						tree_name = generic_vegetation_name
-					end
-					
-					-- TODO: properly decide what to do here?
---~ 				if terrain_type ~= TerrainType.mountains then
---~             if tree_size ~= small and tree_density <= rng:get_real(0, 1) then
---~               tree_name = generic_vegetaion_name
---~             end
---~             feature_map:set(i, j, tree_name)
---~           elseif tree_density > rng:get_real(0, 1) then
---~             feature_map:set(i, j, tree_name)
---~           end
-				
-				feature_map:set(i, j, tree_name)
-				
-				--[[ JELLY END ]]
-        end
-      end
-    end
-  end
 end
 
 function Landscaper:_get_tree_type(terrain_type, step)
@@ -299,7 +247,6 @@ function Landscaper:_place_small_tree(feature_name, i, j, tile_map, place_item)
 end
 
 function Landscaper:_place_normal_tree(feature_name, i, j, tile_map, place_item)
---~ 	log:spam('place normal %s', feature_name)
   local max_trunk_radius = 3
   local ground_radius = 2
   local rng = self._rng
@@ -328,53 +275,23 @@ function Landscaper:place_features(tile_map, feature_map, place_item)
 end
 
 function Landscaper:mark_berry_bushes(elevation_map, feature_map)
-  local rng = self._rng
-  local terrain_info = self._terrain_info
-  local perturbation_grid = self._perturbation_grid
-  local noise_map, density_map = self:_get_filter_buffers(feature_map.width, feature_map.height)
-  local value, occupied, elevation, terrain_type
+	--[[ START JELLY ]]--
+	-- Just like mark_trees, completely re-factored minus the noise function.
+	local generator = self:_create_generator(self._bushes_by_terrain, 'filter_2D_050', 6, elevation_map, feature_map)
 	
-	--[[ JELLY START ]]--
-	local bushes_by_terrain = self._bushes_by_terrain
-	local bush_object, step
-	--[[ JELLY END ]]--
-	
-  local function noise_fn(i, j)
+	generator:set_noise_function(function(i, j, args)
     local mean = -50
     local std_dev = 30
-    local feature = feature_map:get(i, j)
+    local feature = args.feature_map:get(i, j)
 
-    if self:is_tree_name(feature) then
+    if args.landscaper:is_tree_name(feature) then
       mean = mean + 100
     end
-    return rng:get_gaussian(mean, std_dev)
-  end
-  noise_map:fill_ij(noise_fn)
-  FilterFns.filter_2D_050(density_map, noise_map, noise_map.width, noise_map.height, 6)
+    return args.rng:get_gaussian(mean, std_dev)
+  end)
 	
-  for j = 1, density_map.height do
-    for i = 1, density_map.width do
-      value = density_map:get(i, j)
-			
-      if value > 0 then
-        occupied = feature_map:get(i, j) ~= nil
-        if not occupied then
-          elevation = elevation_map:get(i, j)
-					
-					--[[ START JELLY ]]--
-          terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
-					
-					bush_object = self:_get_flora_object(bushes_by_terrain[terrain_type], value, rng, terrain_type, step)
-
-					if bush_object then
-						feature_map:set(i, j, bush_object.jelly_id)
-					end
-					
-					--[[ END JELLY ]]--
-        end
-      end
-    end
-  end
+	generator:mark()
+	--[[ END JELLY ]]--
 end
 
 function Landscaper:_place_berry_bush(feature_name, i, j, tile_map, place_item)
@@ -410,62 +327,35 @@ function Landscaper:_random_berry_pattern()
 end
 
 function Landscaper:mark_flowers(elevation_map, feature_map)
-  local rng = self._rng
-  local terrain_info = self._terrain_info
-  local perturbation_grid = self._perturbation_grid
-  local noise_map, density_map = self:_get_filter_buffers(feature_map.width, feature_map.height)
-  local value, occupied, elevation, terrain_type
-	--[[ JELLY START ]]--
-	local flowers_by_terrain = self._flowers_by_terrain
-	local flower_object, step
-	--[[ JELLY END ]]--
+	--[[ START JELLY ]]--
+	local generator = self:_create_generator(self._flowers_by_terrain, 'filter_2D_025', 8, elevation_map, feature_map)
 	
-  local function noise_fn(i, j)
+  generator:set_noise_function(function(i, j, args)
     local mean = 0
     local std_dev = 100
-    if noise_map:is_boundary(i, j) then
+    
+		if args.noise_map:is_boundary(i, j) then
       mean = mean - 20
     end
-    local feature = feature_map:get(i, j)
-    if self:is_tree_name(feature) then
+    
+		local feature = args.feature_map:get(i, j)
+    
+		if args.landscaper:is_tree_name(feature) then
       mean = mean - 200
     end
-    local elevation = elevation_map:get(i, j)
-    local terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
-    if terrain_type == TerrainType.plains and step == 1 then
+		
+    local elevation = args.elevation_map:get(i, j)
+		local terrain_type, step = args.terrain_info:get_terrain_type_and_step(elevation)
+    
+		if terrain_type == TerrainType.plains and step == 1 then
       mean = mean - 200
     end
-    return rng:get_gaussian(mean, std_dev)
-  end
-  noise_map:fill_ij(noise_fn)
-  FilterFns.filter_2D_025(density_map, noise_map, noise_map.width, noise_map.height, 8)
-  
-	for j = 1, density_map.height do
-    for i = 1, density_map.width do
-      value = density_map:get(i, j)
-      if value > 0 then
-        occupied = feature_map:get(i, j) ~= nil
-				--[[ JELLY START ]]--
-				elevation = elevation_map:get(i, j)
-				terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
-
-				flower_object = self:_get_flora_object(flowers_by_terrain[terrain_type], value, rng, terrain_type, step)
-				
-				if flower_object then
-					feature_map:set(i, j, flower_object.jelly_id)
-				end
-				
---~         if not occupied --[[and value >= rng:get_int(1, 100)]] then
---~           elevation = elevation_map:get(i, j)
---~           terrain_type = terrain_info:get_terrain_type(elevation)
---~           if terrain_type == TerrainType.plains then
---~             feature_map:set(i, j, pink_flower_name)
---~           end
---~         end
-				--[[ JELLY END ]]
-      end
-    end
-  end
+		
+    return args.rng:get_gaussian(mean, std_dev)
+  end)
+	
+	generator:mark()
+	--[[ JELLY END ]]--
 end
 
 function Landscaper:_place_flower(feature_name, i, j, tile_map, place_item)
@@ -751,7 +641,6 @@ function Landscaper:_initialize_objects(index_name, elements_name, name_suffix, 
 	-- Collect garbage stuff now to clean up the whole parsing.
 	collectgarbage('collect')
 	
-	PrintTable(objects)
 	return objects, objects_by_terrain
 end
 
@@ -831,10 +720,21 @@ function Landscaper:_get_flora_object(objects, value, ...)
 	return self:_get_candidate(candidates, candidateSum)
 end
 
--- Not necessary.
---~ function Landscaper:_get_tree_size() end
+function Landscaper:_create_generator(elements, filter_name, filter_order, elevation_map, feature_map)
+	local args = 
+	{
+		rng = self._rng,
+		elevation_map = elevation_map,
+		terrain_info = self._terrain_info,
+		feature_map = feature_map,
+		landscaper = self
+	}
+	
+	local generator = GenericLandscaper(elements, filter_name, filter_order, args)
+	
+	return generator
+end
 
--- get_tree_type already dealt with this.
---~ function Landscaper:_get_tree_name(tree_type, tree_size) return tree_type end
+Landscaper.generic_vegetation_name = generic_vegetation_name
 --[[ END JELLY CODE ]]--
 return Landscaper
