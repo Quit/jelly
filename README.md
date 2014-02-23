@@ -1,7 +1,11 @@
 Bottle o' Jelly
 =====
 
-Jelly is an experimental framework built on top, with, over and sometimes under the official Stonehearth modding API. Its spiritual predecessor was RP, whose code is the base for Jelly.
+Jelly is an **experimental framework** built on top, with, over and sometimes under the official Stonehearth modding API. Its spiritual predecessor was RP, whose code is the base for Jelly.
+
+# So Jelly is RP 2, right?
+
+Nope, it's not. While - at some point - it is going to provide about the same functionality as RP does, Jelly goes a completely different direction. RP relied heavily on users listening to events and patching things - Jelly is more data driven. It is less the director of mods and more of an actor - instead of ordering around all the mods, it's merely organizing them.
 
 # What can Jelly do?
 
@@ -33,7 +37,7 @@ Jelly is a community made, inofficial project. There are several things you shou
 
 ## Jelly is a parachute, not a safety net.
 
-- It's possible that Jelly breaks with every update. It might take a few hours up to a few days to get a new version running.
+- It's possible that Jelly breaks with every game update. It's possible that I release versions that are absolutely unusable. It might take a few hours up to a few days to get a new (and working) version running.
 - Things can break. Things *will* break. Jelly is just as much of an Alpha construct as the game itself. While the goal will be to minimize damage, it cannot be guaranteed. Prepare to have your mod rustled.
 
 ## Jelly is alive.
