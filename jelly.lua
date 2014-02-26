@@ -31,6 +31,7 @@ jelly.util = require('util')
 jelly.resources = require('resources')
 jelly.linq = require('linq')
 jelly.sh = require('sh')
+jelly.timers = require('timers')
 
 log:info('Jelly loaded.')
 
