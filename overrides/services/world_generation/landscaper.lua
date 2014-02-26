@@ -171,7 +171,8 @@ function Landscaper:mark_trees(elevation_map, feature_map)
 			if step == 2 then
 				mean = mean - 5
 			else
-				mean = mean - 100
+				mean = mean - 300
+				std_dev = 0
 			end
 		elseif step == 2 then
 			mean = mean + 5
