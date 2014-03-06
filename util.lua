@@ -299,4 +299,95 @@ function util.table_max(tbl, func)
 	return best_k, best_v, best_m
 end
 
+-- List of things we consider "true" or "false" when dealing with configs.
+local boolean_table = 
+{
+	[0] = false,
+	["0"] = false,
+	["false"] = false,
+	["no"] = false,
+	
+	[1] = true,
+	["1"] = true,
+	["true"] =  true,
+	["yes"] = true
+}
+
+local comfort_table
+
+-- Returns `given` in a way it comforts `default`
+local function comfort_values(given, default)
+	local given_type, default_type = type(given), type(default)
+	
+	-- Not compatible?
+	if given_type ~= default_type then
+		-- Boxing?
+		if default_type == 'table' then
+			return comfort_table({ given }, default)
+		-- tostring
+		elseif default_type == 'string' then
+			return tostring(given)
+		-- numbering
+		elseif default_type == 'number' and tonumber(given) then
+			return tonumber(given)
+		-- booleaning
+		elseif default_type == 'boolean' and boolean_table[given] ~= nil then
+			return boolean_table[given]
+		-- default value
+		else
+			return default -- This will already be properly aligned
+		end
+	-- Otherwise, if both are tables, comfort them
+	elseif default_type == 'table' then
+		return comfort_table(given, default)
+	end
+	
+	return given
+end
+
+-- compares if all values in `given` are comfortable to `default`
+-- and returns json modified in a way that all values comfort default
+-- (i.e. have the same type)
+function comfort_table(given, default)
+	for key, default_value in pairs(default) do
+		local given_value = given[key]
+		
+		-- json does not define this value: We do it.
+		if given_value == nil then
+			given[key] = default_value
+		else -- json does define this value, validate it
+			given[key] = comfort_values(given_value, default_value)
+		end
+	end
+	
+	return given
+end
+
+--! desc Loads the config of the current mod
+function util.load_config()
+	local mod_name = __get_current_module_name(3)
+	
+	local manifest_loaded, manifest = pcall(radiant.resources.load_manifest, mod_name)
+	
+	if not manifest_loaded then
+		error(string.format('cannot load manifest of %s: %s', mod_name, manifest))
+	end
+	
+	if not manifest.jelly or not manifest.jelly.default_config then
+		error(string.format('manifest of %s does not contain default config values', mod_name))
+	end
+	
+	manifest = manifest.jelly.default_config
+	
+	-- Try to load the user settings
+	local user_settings = _host:get_config('mods.' .. __get_current_module_name(3))
+	
+	-- Try to comfort the user_settings to json (which, by now, is our new default)
+	if user_settings then
+		manifest = comfort_table(user_settings, manifest)
+	end
+	
+	return manifest, user_settings ~= nil
+end
+
 return util
