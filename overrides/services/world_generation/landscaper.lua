@@ -261,18 +261,30 @@ end
 
 function Landscaper:place_features(tile_map, feature_map, place_item)
   local feature_name, fn
+	local features_by_name = {}
   for j = 1, feature_map.height do
     for i = 1, feature_map.width do
       feature_name = feature_map:get(i, j)
-      fn = self._function_table[feature_name]
-      if fn then
-        fn(self, feature_name, i, j, tile_map, place_item)
-      elseif feature_name then
-				log:info('cannot find feature %q!', tostring(feature_name))
+			
+			--[[ JELLY START ]]--
+			if feature_name then
+				fn = self._function_table[feature_name]
+				features_by_name[feature_name] = (features_by_name[feature_name] or 0) + 1
+				if fn then
+					fn(self, feature_name, i, j, tile_map, place_item)
+				else
+					log:info('cannot find feature %q!', tostring(feature_name))
+				end
 			end
+			
+			--[[ JELLY END ]]--
     end
     self:_yield()
   end
+	
+	for feature_name, count in pairs(features_by_name) do
+		log:info('%s was used %d times', feature_name, count)
+	end
 end
 
 function Landscaper:mark_berry_bushes(elevation_map, feature_map)
@@ -503,10 +515,12 @@ end
 
 --[[ START JELLY CODE ]]--
 function Landscaper:_jelly_place_small_tree(jelly_id, ...)
+	log:info('PL: %q -s> %q', jelly_id, self._trees[jelly_id].entity_ref)
 	return self:_place_small_tree(self._trees[jelly_id].entity_ref, ...)
 end
 
 function Landscaper:_jelly_place_normal_tree(jelly_id, ...)
+	log:info('PL: %q -n> %q', jelly_id, self._trees[jelly_id].entity_ref)
 	return self:_place_normal_tree(self._trees[jelly_id].entity_ref, ...)
 end
 
