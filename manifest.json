@@ -18,6 +18,8 @@
 			"template:default_flower" : "file(data/world_generation/flower_templates/default_flower.json)",
 		
 		"index:bushes" : "file(data/world_generation/bushes.json)",
-			"template:default_bush" : "file(data/world_generation/bush_templates/default_bush.json)"
+			"template:default_bush" : "file(data/world_generation/bush_templates/default_bush.json)",
+			
+		"index:camp_start" : "file(data/new_game/entities.json)"
 	}
 }

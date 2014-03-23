@@ -37,6 +37,7 @@ end
 function MOD:_patch_all()
 	log:info('Patch stuff.')
 	self:_patch('stonehearth.services.world_generation.landscaper', 'jelly.overrides.services.world_generation.landscaper')
+	self:_patch('stonehearth.call_handlers.new_game_call_handler', 'jelly.overrides.call_handlers.new_game_call_handler')
 end
 
 function MOD:_patch(original_path, patched_path)

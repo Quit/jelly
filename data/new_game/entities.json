@@ -1,0 +1,56 @@
+{
+	"faction" : { 
+		"name" : "civ",
+		"kingdom" : "stonehearth:factions:ascendancy"
+	},
+	
+	"banner_entity" : "stonehearth:camp_standard",
+	
+	"citizens" : [
+		{
+			"x" : -3,
+			"z" : -3,
+			
+			"item" : "stonehearth:oak_log"
+		},
+		
+		{
+			"x" : 0,
+			"z" : - 3,
+			
+			"item" : "stonehearth:oak_log"
+		},
+		
+		{
+			"x" : 3,
+			"z" : -3,
+			
+			"item" : "stonehearth:trapper:trapper_knife"
+		},
+		
+		{
+			"x" : -3,
+			"z" : 3,
+			
+			"item" : "stonehearth:carpenter:saw"
+		},
+		
+		{
+			"x" : 3,
+			"z" : 3
+		},
+		
+		{
+			"x" : -3,
+			"z" : 0
+		}
+	],
+	
+	"entities" : [
+		{
+			"entity_ref" : "stonehearth:firepit",
+			"x" : 0,
+			"z" : 3
+		}
+	]
+}
