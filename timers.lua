@@ -106,7 +106,20 @@ local function on_gameloop(event)
 	end
 end
 
-radiant.events.listen(radiant.events, 'stonehearth:gameloop', on_gameloop)
+--! desc Returns the last now().
+--! returns The last now, in milliseconds.
+function timers.now()
+	return last_now
+end
+
+-- On the server, timers are on the gameloop, which is all ~200ms
+if radiant.is_server then
+	radiant.events.listen(radiant.events, 'stonehearth:gameloop', on_gameloop)
+else
+	-- On the client, we don't have such a thing yet. Hacks ahoy!
+	timers._frame_tracer = _radiant.client.trace_render_frame()
+	timers._frame_tracer:on_frame_start("update jelly client timers", function(now, alpha, frame_time) on_gameloop({ now = now }) end)
+end
 
 --[[ jelly public functions ]]--
 --! desc Creates a timer with a certain id that runs at `interval' ticks and has `repetition` repetitions while calling `func`
