@@ -1,7 +1,7 @@
 {
 	"info" : { "name" : "Jelly™" },
 	
-	"server_init_script" : "file(jelly_landscaper_server)",
+	"server_init_script" : "file(jelly_server_init)",
 	
 	"aliases" : {
 		"index:trees" : "file(data/world_generation/trees.json)",
