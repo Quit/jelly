@@ -1,4 +1,4 @@
---[=============================================================================[
+/*=============================================================================//
 The MIT License (MIT)
 
 Copyright (c) 2014 RepeatPan
@@ -21,30 +21,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-]=============================================================================]
+//=============================================================================*/
 
-local log = radiant.log.create_logger('jelly')
-log:info('Loading Jelly.')
-
-jelly = {}
-jelly.util = require('util')
-jelly.resources = require('resources')
-jelly.linq = require('linq')
-jelly.sh = require('sh')
-jelly.timers = require('timers')
-
-
-if radiant.is_server then
-	local js = require('js_server')
-	
-	--! desc Simulates _radiant.call. This will cause a significant delay, as all commands are re-directed to JavaScript, where they are
-	--! desc then re-evaluated. Use this only if you really need to call client sided functions from the server side.
-	--! returns Nothing. It is not possible to wait for these calls.
-	function jelly.call(...)
-		js:call(...)
-	end
-end
-
-log:info('Jelly loaded.')
-
-return jelly
+var tracer;
+radiant.call('jelly:_get_server_data_store').done(function(o) {
+	tracer = radiant.trace(o.data_store).progress(function(update)
+	{
+		$(update.calls).each(function (k, v)
+		{
+			radiant.callv(v.fn, v.args);
+		});
+	});
+});

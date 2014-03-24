@@ -21,5 +21,18 @@
 			"template:default_bush" : "file(data/world_generation/bush_templates/default_bush.json)",
 			
 		"index:camp_start" : "file(data/new_game/entities.json)"
+	},
+	
+	"functions" : {
+		"_get_server_data_store" : {
+			"controller" : "file(js_server.lua)",
+			"endpoint" : "server"
+		}
+	},
+	
+	"ui" : {
+		"js" : [
+			"file(jelly.js)"
+		]
 	}
 }

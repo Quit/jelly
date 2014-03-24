@@ -23,28 +23,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=============================================================================]
 
-local log = radiant.log.create_logger('jelly')
-log:info('Loading Jelly.')
+local JS = class()
 
-jelly = {}
-jelly.util = require('util')
-jelly.resources = require('resources')
-jelly.linq = require('linq')
-jelly.sh = require('sh')
-jelly.timers = require('timers')
+local data_store = _radiant.sim.create_data_store()
 
+local calls = {}
+local function update_data_store()
+	data_store:update({ calls = calls })
+	calls = {}
+end
+update_data_store()
 
-if radiant.is_server then
-	local js = require('js_server')
-	
-	--! desc Simulates _radiant.call. This will cause a significant delay, as all commands are re-directed to JavaScript, where they are
-	--! desc then re-evaluated. Use this only if you really need to call client sided functions from the server side.
-	--! returns Nothing. It is not possible to wait for these calls.
-	function jelly.call(...)
-		js:call(...)
-	end
+function JS:_get_server_data_store()
+	return { data_store = data_store }
 end
 
-log:info('Jelly loaded.')
+function JS:call(fn, ...)
+	table.insert(calls, { fn = fn, args = { ... }})
+	update_data_store()
+end
 
-return jelly
+return JS
