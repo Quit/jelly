@@ -38,8 +38,8 @@ function JS:_get_server_data_store()
 	return { data_store = data_store }
 end
 
-function JS:call(fn, ...)
-	table.insert(calls, { fn = fn, args = { ... }})
+function JS:call(...)
+	table.insert(calls, { ... })
 	update_data_store()
 end
 
