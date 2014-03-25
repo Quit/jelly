@@ -27,11 +27,11 @@ local log = radiant.log.create_logger('jelly')
 log:info('Loading Jelly.')
 
 jelly = {}
-jelly.util = require('util')
-jelly.resources = require('resources')
-jelly.linq = require('linq')
-jelly.sh = require('sh')
-jelly.timers = require('timers')
+jelly.util = require('lib.util')
+jelly.resources = require('lib.resources')
+jelly.linq = require('lib.linq')
+jelly.sh = require('lib.sh')
+jelly.timers = require('lib.timers')
 
 
 if radiant.is_server then
