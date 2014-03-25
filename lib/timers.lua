@@ -102,9 +102,9 @@ local function on_gameloop(event)
 	
 	-- For each expired timer
 	for i = 1, t0 do
-		-- Make sure that the timer is *really* dead
-		if ticking_timers[t[t0]]:is_stopped() then
-			ticking_timers[t[t0]] = nil
+		-- Make sure that the timer is *really* dead and wasn't restarted in-between
+		if ticking_timers[t[i]]:is_stopped() then
+			ticking_timers[t[i]] = nil
 		end
 	end
 end
@@ -138,6 +138,12 @@ function timers.create(id, interval, repetition, func, ...)
 		interval = timers.time_to_ticks(timers.parse_time(interval))
 	end
 	
+	-- Does a timer with that id already exist?
+	if ticking_timers[id] then
+		-- Stop it.
+		ticking_timers[id]:stop()
+	end
+	
 	local timer = Timer(id, interval, repetition, func, ...)
 	ticking_timers[id] = timer
 	
@@ -155,6 +161,9 @@ function timers.remove_timer(id)
 		timer:stop()
 	end
 end
+
+--! same jelly.timers.remove_timer
+timers.destroy = timers.remove_timer
 
 --! desc Creates a fire-and-forget timer.
 --! param number interval Interval after which the timer is executed
@@ -179,10 +188,10 @@ Timer = class()
 --! hidden
 function Timer:__init(id, interval, repetition, func, ...)
 	assert(id)
-	assert(interval)
-	assert(repetition)
-	assert(func)
-	
+	radiant.check.is_number(interval)
+	radiant.check.is_number(repetition)
+	radiant.check.is_function(func)
+
 	self.id, self.interval, self.repetition, self.func, self.args = id, interval, repetition, func, { ... }
 	
 	-- When we'll run the timer the next time
