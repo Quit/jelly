@@ -22,6 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=============================================================================]
 
+local radiant = radiant
+local math, tonumber, pairs, type, unpack = math, tonumber, pairs, type, unpack
+
 local constants = radiant.resources.load_json("/stonehearth/services/calendar/calendar_constants.json")
 
 --! realm jelly
