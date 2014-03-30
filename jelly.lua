@@ -32,7 +32,7 @@ jelly.resources = require('lib.resources')
 jelly.linq = require('lib.linq')
 jelly.sh = require('lib.sh')
 jelly.timers = require('lib.timers')
-
+jelly.tasks = require('lib.tasks')
 
 if radiant.is_server then
 	local js = require('js_server')
