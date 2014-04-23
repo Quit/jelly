@@ -30,13 +30,13 @@ SOFTWARE.
 	the original game files and its copyright belongs entirely to Radiant Entertainment.
 --]]--
 
-local TerrainType = require("services.world_generation.terrain_type")
-local TerrainInfo = require("services.world_generation.terrain_info")
-local Array2D = require("services.world_generation.array_2D")
-local MathFns = require("services.world_generation.math.math_fns")
-local FilterFns = require("services.world_generation.filter.filter_fns")
-local PerturbationGrid = require("services.world_generation.perturbation_grid")
-local BoulderGenerator = require("services.world_generation.boulder_generator")
+local TerrainType = require("services.server.world_generation.terrain_type")
+local TerrainInfo = require("services.server.world_generation.terrain_info")
+local Array2D = require("services.server.world_generation.array_2D")
+local MathFns = require("services.server.world_generation.math.math_fns")
+local FilterFns = require("services.server.world_generation.filter.filter_fns")
+local PerturbationGrid = require("services.server.world_generation.perturbation_grid")
+local BoulderGenerator = require("services.server.world_generation.boulder_generator")
 local log = radiant.log.create_logger("world_generation")
 local Point3 = _radiant.csg.Point3
 local mod_name = "stonehearth"

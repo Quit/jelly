@@ -25,7 +25,7 @@ SOFTWARE.
 local radiant = radiant
 local math, tonumber, pairs, type, unpack = math, tonumber, pairs, type, unpack
 
-local constants = radiant.resources.load_json("/stonehearth/services/calendar/calendar_constants.json")
+local constants = radiant.resources.load_json("/stonehearth/data/calendar/calendar_constants.json")
 
 --! realm jelly
 local timers = {}

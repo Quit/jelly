@@ -25,11 +25,11 @@ SOFTWARE.
 
 local JS = class()
 
-local data_store = _radiant.sim.create_data_store()
+local data_store = radiant.create_datastore()
 
 local calls = {}
 local function update_data_store()
-	data_store:update({ calls = calls })
+	data_store:set_data({ calls = calls })
 	calls = {}
 end
 update_data_store()

@@ -36,13 +36,13 @@ end
 -- Define a list of classes we might want to use, including name.
 local classes = 
 {
-	TerrainType = "services.world_generation.terrain_type",
-	TerrainInfo = "services.world_generation.terrain_info",
-	Array2D = "services.world_generation.array_2D",
-	MathFns = "services.world_generation.math.math_fns",
-	FilterFns = "services.world_generation.filter.filter_fns",
-	PerturbationGrid = "services.world_generation.perturbation_grid",
-	BoulderGenerator = "services.world_generation.boulder_generator"
+	TerrainType = "services.server.world_generation.terrain_type",
+	TerrainInfo = "services.server.world_generation.terrain_info",
+	Array2D = "services.server.world_generation.array_2D",
+	MathFns = "services.server.world_generation.math.math_fns",
+	FilterFns = "services.server.world_generation.filter.filter_fns",
+	PerturbationGrid = "services.server.world_generation.perturbation_grid",
+	BoulderGenerator = "services.server.world_generation.boulder_generator"
 }
 
 for k, v in pairs(classes) do

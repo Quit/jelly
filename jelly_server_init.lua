@@ -25,7 +25,7 @@ SOFTWARE.
 
 
 local jelly = require('jelly')
-local TerrainType = radiant.mods.require("stonehearth.services.world_generation.terrain_type")
+local TerrainType = radiant.mods.require("stonehearth.services.server.world_generation.terrain_type")
 local log = radiant.log.create_logger("server")
 
 local MOD = class()
@@ -36,7 +36,7 @@ end
 
 function MOD:_patch_all()
 	log:info('Patch stuff.')
-	self:_patch('stonehearth.services.world_generation.landscaper', 'jelly.overrides.services.world_generation.landscaper')
+	self:_patch('stonehearth.services.server.world_generation.landscaper', 'jelly.overrides.services.world_generation.landscaper')
 	self:_patch('stonehearth.call_handlers.new_game_call_handler', 'jelly.overrides.call_handlers.new_game_call_handler')
 end
 

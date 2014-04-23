@@ -30,9 +30,9 @@ SOFTWARE.
 	the original game files and its copyright belongs entirely to Radiant Entertainment.
 --]]--
 
-local MathFns = require("services.world_generation.math.math_fns")
-local BlueprintGenerator = require("services.world_generation.blueprint_generator")
-local game_master = require("services.game_master.game_master_service")
+local MathFns = require("services.server.world_generation.math.math_fns")
+local BlueprintGenerator = require("services.server.world_generation.blueprint_generator")
+local game_master = require("services.server.game_master.game_master_service")
 local personality_service = stonehearth.personality
 local Point2 = _radiant.csg.Point2
 local Point3 = _radiant.csg.Point3
