@@ -1,9 +1,4 @@
 {
-	"faction" : { 
-		"name" : "civ",
-		"kingdom" : "stonehearth:factions:ascendancy"
-	},
-	
 	"banner_entity" : "stonehearth:camp_standard",
 	
 	"citizens" : [
