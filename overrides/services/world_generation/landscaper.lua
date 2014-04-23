@@ -134,7 +134,6 @@ function Landscaper:place_flora(tile_map, feature_map, tile_offset_x, tile_offse
   local function place_item(uri, x, y)
     local entity = radiant.entities.create_entity(uri)
     radiant.terrain.place_entity(entity, Point3(x - 1 + tile_offset_x, 1, y - 1 + tile_offset_y))
-    self:_set_random_facing(entity)
     return entity
   end
   self:place_features(tile_map, feature_map, place_item)
