@@ -1,5 +1,6 @@
 {
 	"banner_entity" : "stonehearth:camp_standard",
+	"ghost_banner_entity" : "stonehearth:camp_standard_ghost",
 	
 	"citizens" : [
 		{
@@ -20,14 +21,14 @@
 			"x" : 3,
 			"z" : -3,
 			
-			"item" : "stonehearth:trapper:trapper_knife"
+			"item" : "stonehearth:trapper:knife_talisman"
 		},
 		
 		{
 			"x" : -3,
 			"z" : 3,
 			
-			"item" : "stonehearth:carpenter:saw"
+			"item" : "stonehearth:carpenter:saw_talisman"
 		},
 		
 		{
@@ -37,6 +38,11 @@
 		
 		{
 			"x" : -3,
+			"z" : 0
+		},
+		
+		{
+			"x" : 3,
 			"z" : 0
 		}
 	],
