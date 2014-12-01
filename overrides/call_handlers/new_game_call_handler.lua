@@ -232,7 +232,16 @@ function NewGameCallHandler:create_camp(session, response, pt)
 	end
 	
 	for _, workerDef in pairs(json.citizens) do
-		place_citizen_embark(camp_x + workerDef.x, camp_z + workerDef.z, workerDef.profession, workerDef.item)
+		local worker = place_citizen_embark(
+			camp_x + workerDef.x, 
+			camp_z + workerDef.z, 
+			workerDef.job,
+			workerDef.talisman
+		)
+		
+		if workerDef.item then
+			radiant.entities.pickup_item(worker, pop:create_entity(workerDef.item))
+		end
 	end
 	
 	for _, entityDef in pairs(json.entities) do
