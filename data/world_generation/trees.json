@@ -16,6 +16,11 @@
 		},
 		
 		{
+			"template" : [ "jelly:template:ancient_tree", "jelly:template:oak" ],
+			"entity_ref" : "stonehearth:ancient_oak_tree"
+		},
+		
+		{
 			"template" : [ "jelly:template:small_tree", "jelly:template:foothill_juniper" ],
 			"entity_ref" : "stonehearth:small_juniper_tree"
 		},
@@ -28,6 +33,11 @@
 		{
 			"template" : [ "jelly:template:large_tree", "jelly:template:foothill_juniper" ],
 			"entity_ref" : "stonehearth:large_juniper_tree"
+		},
+		
+		{
+			"template" : [ "jelly:template:ancient_tree", "jelly:template:foothill_juniper" ],
+			"entity_ref" : "stonehearth:ancient_juniper_tree"
 		},
 		
 		{

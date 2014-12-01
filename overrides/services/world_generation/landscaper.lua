@@ -33,7 +33,6 @@ SOFTWARE.
 local TerrainType = require("services.server.world_generation.terrain_type")
 local TerrainInfo = require("services.server.world_generation.terrain_info")
 local Array2D = require("services.server.world_generation.array_2D")
-local MathFns = require("services.server.world_generation.math.math_fns")
 local FilterFns = require("services.server.world_generation.filter.filter_fns")
 local PerturbationGrid = require("services.server.world_generation.perturbation_grid")
 local BoulderGenerator = require("services.server.world_generation.boulder_generator")
@@ -47,12 +46,14 @@ local tree_types = {oak, juniper}
 local small = "small"
 local medium = "medium"
 local large = "large"
+local ancient = "ancient"
 local tree_sizes = {
   small,
   medium,
-  large
+  large,
+	ancient
 }
-local pink_flower_name = mod_prefix .. "pink_flower"
+local pink_flower_name = mod_prefix .. "brightbell:wild"
 local berry_bush_name = mod_prefix .. "berry_bush"
 local generic_vegetaion_name = "vegetation"
 
@@ -103,7 +104,6 @@ function Landscaper:_initialize_function_table()
     end
   end
   function_table[berry_bush_name] = self._place_berry_bush
-  function_table[pink_flower_name] = self._place_flower
   self._function_table = function_table
 end
 
@@ -134,6 +134,7 @@ function Landscaper:place_flora(tile_map, feature_map, tile_offset_x, tile_offse
   local function place_item(uri, x, y)
     local entity = radiant.entities.create_entity(uri)
     radiant.terrain.place_entity(entity, Point3(x - 1 + tile_offset_x, 1, y - 1 + tile_offset_y))
+		self:_set_random_facing(entity)
     return entity
   end
   self:place_features(tile_map, feature_map, place_item)
@@ -213,15 +214,9 @@ function Landscaper:_get_tree_type(terrain_type, step)
 end
 
 function Landscaper:_get_tree_size(value)
-  local large_tree_threshold = 20
-  local medium_tree_threshold = 4
-  if value >= large_tree_threshold then
-    return large
-  end
-  if value >= medium_tree_threshold then
-    return medium
-  end
-  return small
+	--[[ JELLY START ]]--
+	error('This function has been made obsolete by Jelly.')
+	--[[ JELLY END]]--
 end
 
 function Landscaper:_place_small_tree(feature_name, i, j, tile_map, place_item)
@@ -340,33 +335,8 @@ end
 
 function Landscaper:mark_flowers(elevation_map, feature_map)
 	--[[ START JELLY ]]--
-	local generator = self:_create_generator(self._flowers_by_terrain, 'filter_2D_025', 8, elevation_map, feature_map)
-	
-  generator:set_noise_function(function(i, j, args)
-    local mean = 0
-    local std_dev = 100
-    
-		if args.noise_map:is_boundary(i, j) then
-      mean = mean - 20
-    end
-    
-		local feature = args.feature_map:get(i, j)
-    
-		if args.landscaper:is_tree_name(feature) then
-      mean = mean - 200
-    end
-		
-    local elevation = args.elevation_map:get(i, j)
-		local terrain_type, step = args.terrain_info:get_terrain_type_and_step(elevation)
-    
-		if terrain_type == TerrainType.plains and step == 1 then
-      mean = mean - 200
-    end
-		
-    return args.rng:get_gaussian(mean, std_dev)
-  end)
-	
-	generator:mark()
+	-- This function is not used anymore, since flowers are now placed
+	-- by scenarios. It is, however, still called by the WorldGenerationService.
 	--[[ JELLY END ]]--
 end
 
@@ -558,7 +528,7 @@ function Landscaper:_initialize_function_table(...)
 	self._function_table = self._function_table or {}
 	
 	self._trees, self._trees_by_terrain = self:_initialize_objects('jelly:index:trees', 'trees', '_tree', self._initialize_tree) -- _tree is required for :is_tree_name
-	self._flowers, self._flowers_by_terrain = self:_initialize_objects('jelly:index:flowers', 'flowers', '_flower', self._initialize_flower) -- _flower is not required to my knowledge
+--~ 	self._flowers, self._flowers_by_terrain = self:_initialize_objects('jelly:index:flowers', 'flowers', '_flower', self._initialize_flower) -- _flower is not required to my knowledge
 	self._bushes, self._bushes_by_terrain = self:_initialize_objects('jelly:index:bushes', 'bushes', '_bush', self._initialize_bush)
 	
 	-- BACKWARDS COMPATIBILITY

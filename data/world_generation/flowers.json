@@ -1,9 +1,0 @@
-{
-	"flowers" : [
-		{
-			"template" : [ "jelly:template:default_flower" ],
-			"entity_ref" : "stonehearth:pink_flower",
-			"terrain_types" : [ "plains" ]
-		}
-	]
-}
