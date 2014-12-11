@@ -23,30 +23,49 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=============================================================================]
 
-local log = radiant.log.create_logger('jelly')
-log:info('Loading Jelly.')
+local stdout = radiant.log.create_logger('out')
 
-jelly = {}
-jelly.util = require('lib.util')
-jelly.resources = require('lib.resources')
-jelly.linq = require('lib.linq')
-jelly.sh = require('lib.sh')
-jelly.timers = require('lib.timers')
-jelly.tasks = require('lib.tasks')
-jelly.out = require('lib.out')
+-- Note: Most/all of these functions are global too, because they are "too vital"
+-- TODO: Make globalisation optional.
+local out = {}
 
-if radiant.is_server then
-	local js = require('js_server')
-	
-	--! desc Simulates _radiant.call. This will cause a significant delay, as all commands are re-directed to JavaScript, where they are
-	--! desc then re-evaluated. Use this only if you really need to call client sided functions from the server side.
-	--! returns Nothing. It is not possible to wait for these calls.
-	function jelly.call(...)
-		js:call(...)
+do -- Overwrites `io.output' to our log file(s)
+	io.output('jelly_stdout' .. (radiant.is_server and '_server' or '') .. '.log')
+	local function print_plain(to_logger, ...)
+		local t = { ... }
+		
+		local argc = select('#', ...)
+		io.write('[')
+		io.write(os.date())
+		io.write('] ')
+		
+		for i = 1, argc do
+			t[i] = tostring(t[i])
+			io.write(t[i])
+			
+			if i < argc then
+				io.write("\t")
+			end
+		end
+		
+		io.write("\n")
+		io.flush()
+		
+		if to_logger then
+			stdout:write(0, table.concat(t, '\t'))
+		end
 	end
+	
+	function print(...)
+		print_plain(true, ...)
+	end
+	
+	function printf(str, ...)
+		print_plain(false, string.format(str, ...))
+		stdout:write(0, str, ...)
+	end
+	
+	out.print, out.printf = print, printf
 end
 
-log:info('Jelly loaded.')
-print('Jelly loaded.')
-
-return jelly
+return out
