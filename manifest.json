@@ -31,6 +31,11 @@
 		"_get_server_data_store" : {
 			"controller" : "file(js_server.lua)",
 			"endpoint" : "server"
+		},
+		
+		"print" : {
+			"controller" : "file(js_server.lua)",
+			"endpoint" : "server"
 		}
 	},
 	

@@ -43,4 +43,8 @@ function JS:call(fn, ...)
 	update_data_store()
 end
 
+function JS:print(session, response, ...)
+	print(...)
+end
+
 return JS

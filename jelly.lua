@@ -26,6 +26,7 @@ SOFTWARE.
 local log = radiant.log.create_logger('jelly')
 log:info('Loading Jelly.')
 
+-- The jelly family
 jelly = {}
 jelly.util = require('lib.util')
 jelly.resources = require('lib.resources')
@@ -34,6 +35,9 @@ jelly.sh = require('lib.sh')
 jelly.timers = require('lib.timers')
 jelly.tasks = require('lib.tasks')
 jelly.out = require('lib.out')
+
+-- lua standard library extensions
+require('lib.table')
 
 if radiant.is_server then
 	local js = require('js_server')

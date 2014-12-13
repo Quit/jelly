@@ -24,6 +24,13 @@ SOFTWARE.
 //=============================================================================*/
 
 var tracer;
+jelly = {
+	print : function()
+	{
+		return radiant.callv('jelly:print', arguments);
+	}
+};
+
 radiant.call('jelly:_get_server_data_store').done(function(o) {
 	tracer = radiant.trace(o.data_store).progress(function(update)
 	{
@@ -33,3 +40,20 @@ radiant.call('jelly:_get_server_data_store').done(function(o) {
 		});
 	});
 });
+
+// Patch errors to the console
+var oldError = window.onerror;
+
+window.onerror = function(errorMsg, url, lineNumber)
+{
+	errorMsg = errorMsg || '(unknown error message)';
+	url = url || '(unknown url)';
+	lineNumber = lineNumber || '(unknown line number)';
+	
+	jelly.print('ERROR: ' + url + ':' + lineNumber + ': ' + errorMsg);
+
+	if (typeof oldError != 'undefined')
+		return oldError(errorMsg, url, lineNumber);
+	
+	return false;
+}
