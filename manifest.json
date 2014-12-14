@@ -36,6 +36,11 @@
 		"print" : {
 			"controller" : "file(js_server.lua)",
 			"endpoint" : "server"
+		},
+		
+		"store_data" : {
+			"controller" : "file(js_server.lua)",
+			"endpoint" : "server"
 		}
 	},
 	

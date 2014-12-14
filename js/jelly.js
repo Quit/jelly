@@ -24,10 +24,27 @@ SOFTWARE.
 //=============================================================================*/
 
 var tracer;
+var data = {};
+
 jelly = {
+	// Prints something to the console
 	print : function()
 	{
 		return radiant.callv('jelly:print', arguments);
+	},
+	
+	// Returns the value of a previously lua-stored value.
+	// These values are not saved in the game, but persist until the game is restarted.
+	get_data: function(key)
+	{
+		return data[key];
+	},
+	
+	// Stores a variable in the lua state to persist through UI reloads.
+	store_data: function(key, value)
+	{
+		//data[key] = value; // "caching" would be useful, but not desired for debugging
+		return radiant.call('jelly:store_data', key, value);
 	}
 };
 
@@ -38,6 +55,9 @@ radiant.call('jelly:_get_server_data_store').done(function(o) {
 		{
 			radiant.callv(v.fn, v.args);
 		});
+		
+		data = update.data;
+		console.debug(update);
 	});
 });
 

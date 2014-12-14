@@ -28,11 +28,16 @@ local JS = class()
 local data_store = radiant.create_datastore()
 
 local calls = {}
+local data = {}
+
 local function update_data_store()
-	data_store:set_data({ calls = calls })
+	data_store:set_data({ calls = calls, data = data })
 	calls = {}
 end
-update_data_store()
+
+function JS:__init()
+	update_data_store()
+end
 
 function JS:_get_server_data_store()
 	return { data_store = data_store }
@@ -41,10 +46,18 @@ end
 function JS:call(fn, ...)
 	table.insert(calls, { fn = fn, args = { ... }})
 	update_data_store()
+	calls = {} -- I'm not sure why we reset the calls once we've inserted one. That seems kinda counter-intuitive if we have multiple calls between two polls. TODO.
 end
 
 function JS:print(session, response, ...)
 	print(...)
+end
+
+function JS:store_data(session, response, var_name, value)
+	-- The data store is not updated, as the JS side does its own house keeping too.
+	-- If the JS state is created (again), it will query the current status, upon which we'll have the
+	-- data prepared.
+	data[var_name] = value
 end
 
 return JS
