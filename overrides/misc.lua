@@ -23,37 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=============================================================================]
 
-local log = radiant.log.create_logger('jelly')
-log:info('Loading Jelly.')
-
--- The jelly family
-jelly = {}
-jelly.util = require('lib.util')
-jelly.resources = require('lib.resources')
-jelly.linq = require('lib.linq')
-jelly.sh = require('lib.sh')
-jelly.timers = require('lib.timers')
-jelly.tasks = require('lib.tasks')
-jelly.out = require('lib.out')
-
--- lua standard library extensions
-require('lib.table')
-
--- Standard patches
-require('overrides.misc')
-
-if radiant.is_server then
-	local js = require('js_server')
-	
-	--! desc Simulates _radiant.call. This will cause a significant delay, as all commands are re-directed to JavaScript, where they are
-	--! desc then re-evaluated. Use this only if you really need to call client sided functions from the server side.
-	--! returns Nothing. It is not possible to wait for these calls.
-	function jelly.call(...)
-		js:call(...)
-	end
+-- Make assert more useful by telling *where the assertion failed*
+function assert(condition, msg)
+  if not condition then
+    _host:log("env", 1, msg)
+    local info = debug.getinfo(2, 'Sl')
+		error(string.format('%s:%d: %s', info.source, info.currentline, msg or 'assertion failed!'))
+  end
 end
-
-log:info('Jelly loaded.')
-print('Jelly loaded.')
-
-return jelly
