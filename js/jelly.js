@@ -57,3 +57,5 @@ window.onerror = function(errorMsg, url, lineNumber)
 	
 	return false;
 }
+
+$(top).trigger('jelly.PostJellyInit');
