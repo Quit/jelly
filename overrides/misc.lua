@@ -29,5 +29,7 @@ function assert(condition, msg)
     _host:log("env", 1, msg)
     local info = debug.getinfo(2, 'Sl')
 		error(msg or 'assertion failed!', 2)
-  end
+  else
+		return condition
+	end
 end
