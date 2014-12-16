@@ -1,5 +1,5 @@
 {
-	"base" : [ "jelly:template:default_tree" ],
-	
-	"minimum_density" : 20
+   "base" : [ "jelly:template:default_tree" ],
+   
+   "minimum_density" : 20
 }

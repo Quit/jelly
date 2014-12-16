@@ -7,7 +7,7 @@ Think.version = 2
 Think.priority = 1
 
 function Think:run(ai, entity, args)
-	radiant.entities.think(entity, args.thought)
+  radiant.entities.think(entity, args.thought)
 end
 
 return Think

@@ -28,8 +28,8 @@ function assert(condition, msg)
   if not condition then
     _host:log("env", 1, msg)
     local info = debug.getinfo(2, 'Sl')
-		error(msg or 'assertion failed!', 2)
+    error(msg or 'assertion failed!', 2)
   else
-		return condition
-	end
+    return condition
+  end
 end

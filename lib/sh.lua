@@ -30,23 +30,23 @@ local sh = {}
 --! param string path Path to the file inside stonehearth/. No file extension.
 --! returns Whatever the loaded file returns - usually a class or an object.
 function sh.require(path)
-	return radiant.mods.require('stonehearth.' .. path)
+  return radiant.mods.require('stonehearth.' .. path)
 end
 
 -- Define a list of classes we might want to use, including name.
 local classes = 
 {
-	TerrainType = "services.server.world_generation.terrain_type",
-	TerrainInfo = "services.server.world_generation.terrain_info",
-	Array2D = "services.server.world_generation.array_2D",
-	MathFns = "services.server.world_generation.math.math_fns",
-	FilterFns = "services.server.world_generation.filter.filter_fns",
-	PerturbationGrid = "services.server.world_generation.perturbation_grid",
-	BoulderGenerator = "services.server.world_generation.boulder_generator"
+  TerrainType = "services.server.world_generation.terrain_type",
+  TerrainInfo = "services.server.world_generation.terrain_info",
+  Array2D = "services.server.world_generation.array_2D",
+  MathFns = "services.server.world_generation.math.math_fns",
+  FilterFns = "services.server.world_generation.filter.filter_fns",
+  PerturbationGrid = "services.server.world_generation.perturbation_grid",
+  BoulderGenerator = "services.server.world_generation.boulder_generator"
 }
 
 for k, v in pairs(classes) do
-	sh[k] = sh.require(v)
+  sh[k] = sh.require(v)
 end
 
 return sh

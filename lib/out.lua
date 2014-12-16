@@ -30,42 +30,42 @@ local stdout = radiant.log.create_logger('out')
 local out = {}
 
 do -- Overwrites `io.output' to our log file(s)
-	io.output('jelly_stdout' .. (radiant.is_server and '_server' or '') .. '.log')
-	local function print_plain(to_logger, ...)
-		local t = { ... }
-		
-		local argc = select('#', ...)
-		io.write('[')
-		io.write(os.date())
-		io.write('] ')
-		
-		for i = 1, argc do
-			t[i] = tostring(t[i])
-			io.write(t[i])
-			
-			if i < argc then
-				io.write("\t")
-			end
-		end
-		
-		io.write("\n")
-		io.flush()
-		
-		if to_logger then
-			stdout:write(0, table.concat(t, '\t'))
-		end
-	end
-	
-	function print(...)
-		print_plain(true, ...)
-	end
-	
-	function printf(str, ...)
-		print_plain(false, string.format(str, ...))
-		stdout:write(0, str, ...)
-	end
-	
-	out.print, out.printf = print, printf
+  io.output('jelly_stdout' .. (radiant.is_server and '_server' or '') .. '.log')
+  local function print_plain(to_logger, ...)
+    local t = { ... }
+    
+    local argc = select('#', ...)
+    io.write('[')
+    io.write(os.date())
+    io.write('] ')
+    
+    for i = 1, argc do
+      t[i] = tostring(t[i])
+      io.write(t[i])
+      
+      if i < argc then
+        io.write("\t")
+      end
+    end
+    
+    io.write("\n")
+    io.flush()
+    
+    if to_logger then
+      stdout:write(0, table.concat(t, '\t'))
+    end
+  end
+  
+  function print(...)
+    print_plain(true, ...)
+  end
+  
+  function printf(str, ...)
+    print_plain(false, string.format(str, ...))
+    stdout:write(0, str, ...)
+  end
+  
+  out.print, out.printf = print, printf
 end
 
 return out

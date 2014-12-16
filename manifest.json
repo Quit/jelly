@@ -1,53 +1,53 @@
 {
-	"info" : { 
-		"name" : "Jelly™",
-		"version" : 1
-	},
-	
-	"server_init_script" : "file(jelly_server_init)",
-	
-	"aliases" : {
-		"index:trees" : "file(data/world_generation/trees.json)",
-			"generator:trees" : "file(generators/tree_generator.lua)",
-			"template:default_tree" : "file(data/world_generation/tree_templates/default_tree.json)",
-			"template:small_tree" : "file(data/world_generation/tree_templates/small_tree.json)",
-			"template:medium_tree" : "file(data/world_generation/tree_templates/medium_tree.json)",
-			"template:large_tree" : "file(data/world_generation/tree_templates/large_tree.json)",
-			"template:ancient_tree" : "file(data/world_generation/tree_templates/ancient_tree.json)",
-			"template:foothill_juniper" : "file(data/world_generation/tree_templates/foothill_juniper.json)",
-			"template:mountain_juniper" : "file(data/world_generation/tree_templates/mountain_juniper.json)",
-			"template:oak" : "file(data/world_generation/tree_templates/oak.json)",
-		
-		"index:bushes" : "file(data/world_generation/bushes.json)",
-			"template:default_bush" : "file(data/world_generation/bush_templates/default_bush.json)",
-			
-		"index:camp_start" : "file(data/new_game/entities.json)",
-		
-		"actions:think" : "file(ai/think.lua)",
-		"actions:unthink" : "file(ai/unthink.lua)"
-	},
-	
-	"functions" : {
-		"_get_server_data_store" : {
-			"controller" : "file(js_server.lua)",
-			"endpoint" : "server"
-		},
-		
-		"print" : {
-			"controller" : "file(js_server.lua)",
-			"endpoint" : "server"
-		},
-		
-		"store_data" : {
-			"controller" : "file(js_server.lua)",
-			"endpoint" : "server"
-		}
-	},
-	
-	"ui" : {
-		"js" : [
-			"file(js/jelly.js)",
-			"file(js/RootView.js)"
-		]
-	}
+   "info" : { 
+      "name" : "Jelly™",
+      "version" : 1
+   },
+   
+   "server_init_script" : "file(jelly_server_init)",
+   
+   "aliases" : {
+      "index:trees" : "file(data/world_generation/trees.json)",
+         "generator:trees" : "file(generators/tree_generator.lua)",
+         "template:default_tree" : "file(data/world_generation/tree_templates/default_tree.json)",
+         "template:small_tree" : "file(data/world_generation/tree_templates/small_tree.json)",
+         "template:medium_tree" : "file(data/world_generation/tree_templates/medium_tree.json)",
+         "template:large_tree" : "file(data/world_generation/tree_templates/large_tree.json)",
+         "template:ancient_tree" : "file(data/world_generation/tree_templates/ancient_tree.json)",
+         "template:foothill_juniper" : "file(data/world_generation/tree_templates/foothill_juniper.json)",
+         "template:mountain_juniper" : "file(data/world_generation/tree_templates/mountain_juniper.json)",
+         "template:oak" : "file(data/world_generation/tree_templates/oak.json)",
+      
+      "index:bushes" : "file(data/world_generation/bushes.json)",
+         "template:default_bush" : "file(data/world_generation/bush_templates/default_bush.json)",
+         
+      "index:camp_start" : "file(data/new_game/entities.json)",
+      
+      "actions:think" : "file(ai/think.lua)",
+      "actions:unthink" : "file(ai/unthink.lua)"
+   },
+   
+   "functions" : {
+      "_get_server_data_store" : {
+         "controller" : "file(js_server.lua)",
+         "endpoint" : "server"
+      },
+      
+      "print" : {
+         "controller" : "file(js_server.lua)",
+         "endpoint" : "server"
+      },
+      
+      "store_data" : {
+         "controller" : "file(js_server.lua)",
+         "endpoint" : "server"
+      }
+   },
+   
+   "ui" : {
+      "js" : [
+         "file(js/jelly.js)",
+         "file(js/RootView.js)"
+      ]
+   }
 }

@@ -1,57 +1,57 @@
 {
-	"banner_entity" : "stonehearth:camp_standard",
-	"ghost_banner_entity" : "stonehearth:camp_standard_ghost",
-	
-	"citizens" : [
-		{
-			"x" : -3,
-			"z" : -3,
-			
-			"item" : "stonehearth:oak_log"
-		},
-		
-		{
-			"x" : 0,
-			"z" : -3,
-			
-			"item" : "stonehearth:oak_log"
-		},
-		
-		{
-			"x" : 3,
-			"z" : -3,
-			
-			"item" : "stonehearth:trapper:knife_talisman"
-		},
-		
-		{
-			"x" : -3,
-			"z" : 3,
-			
-			"item" : "stonehearth:carpenter:saw_talisman"
-		},
-		
-		{
-			"x" : 3,
-			"z" : 3
-		},
-		
-		{
-			"x" : -3,
-			"z" : 0
-		},
-		
-		{
-			"x" : 3,
-			"z" : 0
-		}
-	],
-	
-	"entities" : [
-		{
-			"entity_ref" : "stonehearth:firepit",
-			"x" : 0,
-			"z" : 3
-		}
-	]
+   "banner_entity" : "stonehearth:camp_standard",
+   "ghost_banner_entity" : "stonehearth:camp_standard_ghost",
+   
+   "citizens" : [
+      {
+         "x" : -3,
+         "z" : -3,
+         
+         "item" : "stonehearth:oak_log"
+      },
+      
+      {
+         "x" : 0,
+         "z" : -3,
+         
+         "item" : "stonehearth:oak_log"
+      },
+      
+      {
+         "x" : 3,
+         "z" : -3,
+         
+         "item" : "stonehearth:trapper:knife_talisman"
+      },
+      
+      {
+         "x" : -3,
+         "z" : 3,
+         
+         "item" : "stonehearth:carpenter:saw_talisman"
+      },
+      
+      {
+         "x" : 3,
+         "z" : 3
+      },
+      
+      {
+         "x" : -3,
+         "z" : 0
+      },
+      
+      {
+         "x" : 3,
+         "z" : 0
+      }
+   ],
+   
+   "entities" : [
+      {
+         "entity_ref" : "stonehearth:firepit",
+         "x" : 0,
+         "z" : 3
+      }
+   ]
 }

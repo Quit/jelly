@@ -41,27 +41,27 @@ local Timer
 --! returns three numbers: The hours, minutes and seconds present in the string. These will be normalized, i.e. hours and seconds are in `[0, 59]`.
 --! remarks This function allows parsing of time strings, which can be handy - but also absurd. It does not validate the input, so `"1d1d`" would be equal to `"2d"`.
 function timers.parse_time(str)
-	local hours, minutes, seconds = 0, 0, 0
-	
-	for time, unit in str:gmatch('(%d+)([dhms])') do
-		time = tonumber(time)
-		if unit == 'd' then
-			hours = hours + time * constants.hours_per_day
-		elseif unit == 'h' then
-			hours = hours + time
-		elseif unit == 'm' then
-			minutes = minutes + time
-		elseif unit == 's' then
-			seconds = seconds + time
-		end
-	end
-	
-	local whole
-	
-	minutes, seconds = minutes + math.floor(seconds / constants.seconds_per_minute), seconds % constants.seconds_per_minute
-	hours, minutes = hours + math.floor(minutes / constants.minutes_per_hour), minutes % constants.minutes_per_hour
-	
-	return hours, minutes, seconds
+  local hours, minutes, seconds = 0, 0, 0
+  
+  for time, unit in str:gmatch('(%d+)([dhms])') do
+    time = tonumber(time)
+    if unit == 'd' then
+      hours = hours + time * constants.hours_per_day
+    elseif unit == 'h' then
+      hours = hours + time
+    elseif unit == 'm' then
+      minutes = minutes + time
+    elseif unit == 's' then
+      seconds = seconds + time
+    end
+  end
+  
+  local whole
+  
+  minutes, seconds = minutes + math.floor(seconds / constants.seconds_per_minute), seconds % constants.seconds_per_minute
+  hours, minutes = hours + math.floor(minutes / constants.minutes_per_hour), minutes % constants.minutes_per_hour
+  
+  return hours, minutes, seconds
 end
 
 --! desc Converts a time(-span) into an amount of game ticks
@@ -70,7 +70,7 @@ end
 --! param number seconds Seconds
 --! returns number Number of the action, in game ticks - according to current timing standards.
 function timers.time_to_ticks(hours, minutes, seconds)
-	return constants.ticks_per_second * ((hours * constants.minutes_per_hour + minutes) * constants.seconds_per_minute + seconds)
+  return constants.ticks_per_second * ((hours * constants.minutes_per_hour + minutes) * constants.seconds_per_minute + seconds)
 end
 
 -- When we last checked our stuff.
@@ -82,46 +82,46 @@ local ticking_timers = {}
 -- Gameloop listener.
 -- Goes through the list of timers, checks if they need to run, calls them if necessary.
 local function on_gameloop(event)
-	last_now = event.now
-	
-	-- List of "run out" timers
-	local t = {}
-	-- Last index of the run out timers
-	local t0 = 0
-	
-	for id, timer in pairs(ticking_timers) do
-		if timer._next_run <= last_now then
-			-- If we have ran out of repetitions...
-			if not timer:_run() then
-				-- Remove us after the loop
-				t0 = t0 + 1
-				t[t0] = id
-			end
-		end
-	end
-	
-	-- For each expired timer
-	for i = 1, t0 do
-		-- Make sure that the timer is *really* dead and wasn't restarted in-between
-		if ticking_timers[t[i]]:is_stopped() then
-			ticking_timers[t[i]] = nil
-		end
-	end
+  last_now = event.now
+  
+  -- List of "run out" timers
+  local t = {}
+  -- Last index of the run out timers
+  local t0 = 0
+  
+  for id, timer in pairs(ticking_timers) do
+    if timer._next_run <= last_now then
+      -- If we have ran out of repetitions...
+      if not timer:_run() then
+        -- Remove us after the loop
+        t0 = t0 + 1
+        t[t0] = id
+      end
+    end
+  end
+  
+  -- For each expired timer
+  for i = 1, t0 do
+    -- Make sure that the timer is *really* dead and wasn't restarted in-between
+    if ticking_timers[t[i]]:is_stopped() then
+      ticking_timers[t[i]] = nil
+    end
+  end
 end
 
 --! desc Returns the last now().
 --! returns The last now, in milliseconds.
 function timers.now()
-	return last_now
+  return last_now
 end
 
 -- On the server, timers are on the gameloop, which is all ~200ms
 if radiant.is_server then
-	radiant.events.listen(radiant.events, 'stonehearth:gameloop', on_gameloop)
+  radiant.events.listen(radiant.events, 'stonehearth:gameloop', on_gameloop)
 else
-	-- On the client, we don't have such a thing yet. Hacks ahoy!
-	timers._frame_tracer = _radiant.client.trace_render_frame()
-	timers._frame_tracer:on_frame_start("update jelly client timers", function(now, alpha, frame_time) on_gameloop({ now = now }) end)
+  -- On the client, we don't have such a thing yet. Hacks ahoy!
+  timers._frame_tracer = _radiant.client.trace_render_frame()
+  timers._frame_tracer:on_frame_start("update jelly client timers", function(now, alpha, frame_time) on_gameloop({ now = now }) end)
 end
 
 --[[ jelly public functions ]]--
@@ -133,21 +133,21 @@ end
 --! param ... ... Any arguments passed to `func`
 --! returns The `Timer` object representing this timer.
 function timers.create(id, interval, repetition, func, ...)
-	-- If a time string has been passed
-	if type(interval) == 'string' then
-		interval = timers.time_to_ticks(timers.parse_time(interval))
-	end
-	
-	-- Does a timer with that id already exist?
-	if ticking_timers[id] then
-		-- Stop it.
-		ticking_timers[id]:stop()
-	end
-	
-	local timer = Timer(id, interval, repetition, func, ...)
-	ticking_timers[id] = timer
-	
-	return timer
+  -- If a time string has been passed
+  if type(interval) == 'string' then
+    interval = timers.time_to_ticks(timers.parse_time(interval))
+  end
+  
+  -- Does a timer with that id already exist?
+  if ticking_timers[id] then
+    -- Stop it.
+    ticking_timers[id]:stop()
+  end
+  
+  local timer = Timer(id, interval, repetition, func, ...)
+  ticking_timers[id] = timer
+  
+  return timer
 end
 
 --! same jelly.timers.create
@@ -156,10 +156,10 @@ timers.add = timers.create
 --! desc Removes the timer with the id `id`.
 --! param value id Id that was used to create the timer and identifies it.
 function timers.remove_timer(id)
-	local timer = ticking_timers[id]
-	if timer then
-		timer:stop()
-	end
+  local timer = ticking_timers[id]
+  if timer then
+    timer:stop()
+  end
 end
 
 --! same jelly.timers.remove_timer
@@ -170,14 +170,14 @@ timers.destroy = timers.remove_timer
 --! param function func Function that is called
 --! param ... ... Any arguments passed to the function.
 function timers.simple(interval, func, ...)
-	return timers.create({}, interval, 1, func, ...)
+  return timers.create({}, interval, 1, func, ...)
 end
 
 --! desc Returns timer with id `id`
 --! param value id Id used to create the timer
 --! returns `Timer` object
 function timers.get_timer(id)
-	return timers[id]
+  return timers[id]
 end
 
 --[[ Timer class ]]--
@@ -187,50 +187,50 @@ Timer = class()
 
 --! hidden
 function Timer:__init(id, interval, repetition, func, ...)
-	assert(id)
-	radiant.check.is_number(interval)
-	radiant.check.is_number(repetition)
-	radiant.check.is_function(func)
+  assert(id)
+  radiant.check.is_number(interval)
+  radiant.check.is_number(repetition)
+  radiant.check.is_function(func)
 
-	self.id, self.interval, self.repetition, self.func, self.args = id, interval, repetition, func, { ... }
-	
-	-- When we'll run the timer the next time
-	self._next_run = last_now + interval
+  self.id, self.interval, self.repetition, self.func, self.args = id, interval, repetition, func, { ... }
+  
+  -- When we'll run the timer the next time
+  self._next_run = last_now + interval
 end
 
 --! hidden
 function Timer:_run()
-	self.repetition = self.repetition - 1
-	
-	if self.repetition < 0 then
-		return false
-	end
-	
-	self.func(unpack(self.args))
-	
-	if self.repetition >= 1 then
-		self:reset()
-		return true
-	end
-	
-	return false
+  self.repetition = self.repetition - 1
+  
+  if self.repetition < 0 then
+    return false
+  end
+  
+  self.func(unpack(self.args))
+  
+  if self.repetition >= 1 then
+    self:reset()
+    return true
+  end
+  
+  return false
 end
 
 --! desc Resets the time until the timer is executed again to the given interval. This does not re-start stopped timers.
 function Timer:reset()
-	self._next_run = last_now + self.interval
+  self._next_run = last_now + self.interval
 end
 
 --! desc Stops the timer and destroys it as soon as possible.
 function Timer:stop()
-	self.repetition = -1
-	self._next_run = math.huge
+  self.repetition = -1
+  self._next_run = math.huge
 end
 
 --! desc Queries whether the timer has been stopped or is still running.
 --! returns Boolean that depicts if the timer will run again (at some point)
 function Timer:is_stopped()
-	return self.repetition < 0
+  return self.repetition < 0
 end
 
 return timers

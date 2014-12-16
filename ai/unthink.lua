@@ -7,7 +7,7 @@ Unthink.version = 2
 Unthink.priority = 1
 
 function Unthink:run(ai, entity, args)
-	radiant.entities.unthink(entity, args.thought)
+  radiant.entities.unthink(entity, args.thought)
 end
 
 return Unthink

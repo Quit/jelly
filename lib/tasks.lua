@@ -31,108 +31,108 @@ local Task = class()
 
 --! desc Creates a new task that executes said function in those intervals.
 function Task:__init(action, interval)
-	self._action, self._interval = coroutine.create(action), interval or 0
-	
-	if not self._action then
-		error('cannot create task: coroutine.create failed!')
-	end
-	
-	self._status = 'created'
+  self._action, self._interval = coroutine.create(action), interval or 0
+  
+  if not self._action then
+    error('cannot create task: coroutine.create failed!')
+  end
+  
+  self._status = 'created'
 end
 
 --! desc 
 function Task:start()
-	if not self:can_start() then
-		error('cannot start task: status is ' .. self._status)
-	end
-	
-	jelly.timers.create(self, self._interval, math.huge, self._run, self)
-	self._status = 'running'
-	
-	-- Call the first tick already.
-	self:_run()
+  if not self:can_start() then
+    error('cannot start task: status is ' .. self._status)
+  end
+  
+  jelly.timers.create(self, self._interval, math.huge, self._run, self)
+  self._status = 'running'
+  
+  -- Call the first tick already.
+  self:_run()
 end
 
 --! desc Returns the task's status.
 function Task:status()
-	return self._status
+  return self._status
 end
 
 --! desc Returns whether a task can be started
 function Task:can_start()
-	return self._status == 'created' or self._status == 'stopped'
+  return self._status == 'created' or self._status == 'stopped'
 end
 
 --! hidden
 function Task:_run()
-	local status, err = coroutine.resume(self._action)
+  local status, err = coroutine.resume(self._action)
 
-	if not status then	
-		self:stop()
-		self._status = 'faulted'
-		error('task execution failed: ' .. err)
-	end
-	
-	-- Did we finish?
-	if coroutine.status(self._action) == 'dead' then
-		self:_finished()
-	end
+  if not status then	
+    self:stop()
+    self._status = 'faulted'
+    error('task execution failed: ' .. err)
+  end
+  
+  -- Did we finish?
+  if coroutine.status(self._action) == 'dead' then
+    self:_finished()
+  end
 end
 
 --! desc Stops execution of said task immediately.
 function Task:stop()
-	jelly.timers.destroy(self)
-	self._status = 'stopped'
+  jelly.timers.destroy(self)
+  self._status = 'stopped'
 end
 
 --! desc Queues a function - or task - to be executed/scheduled as soon as this task
 --! desc has successfully finished
 function Task:continue_with(action)
-	if not is_a(action, Task) and type(action) ~= 'function' then
-		error('action must be a Task or function!')
-	end
-	
-	if type(action) == 'function' then
-		action = Task(action)
-	end
-	
-	if not self._done then
-		self._done = {}
-	end
-	
-	table.insert(self._done, action)
-	
-	-- Allow mass-chaining them.
-	if is_a(action, Task) then
-		return action
-	end
+  if not is_a(action, Task) and type(action) ~= 'function' then
+    error('action must be a Task or function!')
+  end
+  
+  if type(action) == 'function' then
+    action = Task(action)
+  end
+  
+  if not self._done then
+    self._done = {}
+  end
+  
+  table.insert(self._done, action)
+  
+  -- Allow mass-chaining them.
+  if is_a(action, Task) then
+    return action
+  end
 end
 
 --! hidden
 function Task:_finished()
-	-- Stop us
-	self:stop()
-	
-	if self._done then
-		for k, done in pairs(self._done) do
-			-- Is it another task?
-			if is_a(done, Task) and done:can_start() then
-				done:start()
-			else
-				done()
-			end
-		end
-	end
+  -- Stop us
+  self:stop()
+  
+  if self._done then
+    for k, done in pairs(self._done) do
+      -- Is it another task?
+      if is_a(done, Task) and done:can_start() then
+        done:start()
+      else
+        done()
+      end
+    end
+  end
 end
 
 local tasks = {}
 
 --! desc Creates a new task and immediately executes it. Returns the task at hand.
 function tasks.run(func, interval)
-	local t = Task(func, interval)
-	t:start()
-	
-	return t
+  local t = Task(func, interval)
+  t:start()
+  
+  return t
 end
 
 -- To create new tasks on the fly. Might move to its own file at some point...

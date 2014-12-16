@@ -33,13 +33,13 @@ local resources = {}
 --! returns table The table that represents this value.
 --! remarks This function is especially useful if you wish to load data from JSON, but wish that they might be `file()`'d or aliased instead of "written in"
 function resources.load_table(name)
-	if type(name) == 'table' then
-		return name
-	elseif type(name) == 'string' then
-		return radiant.resources.load_json(name)
-	else
-		error('bad argument #1 to jelly.resources.load_table: expected string or table, got ' .. type(name))
-	end
+  if type(name) == 'table' then
+    return name
+  elseif type(name) == 'string' then
+    return radiant.resources.load_json(name)
+  else
+    error('bad argument #1 to jelly.resources.load_table: expected string or table, got ' .. type(name))
+  end
 end
 
 return resources

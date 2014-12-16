@@ -1,5 +1,5 @@
 {
-	"minimum_density" : 0,
-	"pool_weight" : 100,
-	"terrain_types" : [ "plains", "foothills" ]
+   "minimum_density" : 0,
+   "pool_weight" : 100,
+   "terrain_types" : [ "plains", "foothills" ]
 }

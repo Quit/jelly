@@ -34,17 +34,17 @@ local next = next
 --! returns lua iterator
 --! EXPERIMENTAL
 function linq.map_pairs(tbl, func)
-	local map_next = function(tbl, index)
-		local k, v = next(tbl, index)
-		
-		if k == nil then
-			return nil, nil
-		end
-		
-		return k, func(k, v)
-	end
-	
-	return map_next, tbl, nil	
+  local map_next = function(tbl, index)
+    local k, v = next(tbl, index)
+    
+    if k == nil then
+      return nil, nil
+    end
+    
+    return k, func(k, v)
+  end
+  
+  return map_next, tbl, nil	
 end
 
 --! desc Picks only certain elements from `tbl` by evaluating them using `func`
@@ -53,43 +53,43 @@ end
 --! returns lua iterator
 --! EXPERIMENTAL
 function linq.where_pairs(tbl, func)
-	local grep_next = function(tbl, k)
-		local v
-		repeat
-			k, v = next(tbl, k)
-		until not k or func(k, v)
-		
-		return k, v
-	end
-	
-	return grep_next, tbl, nil
+  local grep_next = function(tbl, k)
+    local v
+    repeat
+      k, v = next(tbl, k)
+    until not k or func(k, v)
+    
+    return k, v
+  end
+  
+  return grep_next, tbl, nil
 end
 
 --! desc Concats multiple tables into one.
 --! EXPERIMENTAL
 function linq.concat_pairs(tbl, ...)
-	local args = { ... }
-	local concat_next
-	concat_next	= function(_, k)
-		local k, v = next(tbl, k)
-		
-		-- end of table?
-		if k == nil then
-			-- next one!
-			tbl = table.remove(args, 1)
-			-- no table left?
-			if tbl == nil then
-				return nil, nil
-			end
-			
-			-- re-iterate, just to be sure. and stuff.
-			return concat_next(_, nil)
-		end
-		
-		return k, v
-	end
-	
-	return concat_next, tbl, nil
+  local args = { ... }
+  local concat_next
+  concat_next	= function(_, k)
+    local k, v = next(tbl, k)
+    
+    -- end of table?
+    if k == nil then
+      -- next one!
+      tbl = table.remove(args, 1)
+      -- no table left?
+      if tbl == nil then
+        return nil, nil
+      end
+      
+      -- re-iterate, just to be sure. and stuff.
+      return concat_next(_, nil)
+    end
+    
+    return k, v
+  end
+  
+  return concat_next, tbl, nil
 end
 
 return linq

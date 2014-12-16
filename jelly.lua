@@ -43,14 +43,14 @@ require('lib.table')
 require('overrides.misc')
 
 if radiant.is_server then
-	local js = require('js_server')
-	
-	--! desc Simulates _radiant.call. This will cause a significant delay, as all commands are re-directed to JavaScript, where they are
-	--! desc then re-evaluated. Use this only if you really need to call client sided functions from the server side.
-	--! returns Nothing. It is not possible to wait for these calls.
-	function jelly.call(...)
-		js:call(...)
-	end
+  local js = require('js_server')
+  
+  --! desc Simulates _radiant.call. This will cause a significant delay, as all commands are re-directed to JavaScript, where they are
+  --! desc then re-evaluated. Use this only if you really need to call client sided functions from the server side.
+  --! returns Nothing. It is not possible to wait for these calls.
+  function jelly.call(...)
+    js:call(...)
+  end
 end
 
 log:info('Jelly loaded.')

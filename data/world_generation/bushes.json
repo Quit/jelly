@@ -1,8 +1,8 @@
 {
-	"bushes" : [
-		{
-			"template" : [ "jelly:template:default_bush" ],
-			"entity_ref" : "stonehearth:berry_bush"
-		}
-	]
+   "bushes" : [
+      {
+         "template" : [ "jelly:template:default_bush" ],
+         "entity_ref" : "stonehearth:berry_bush"
+      }
+   ]
 }

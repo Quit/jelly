@@ -27,38 +27,38 @@ var tracer;
 var data = {};
 
 jelly = {
-	// Prints something to the console
-	print : function()
-	{
-		return radiant.callv('jelly:print', arguments);
-	},
-	
-	// Returns the value of a previously lua-stored value.
-	// These values are not saved in the game, but persist until the game is restarted.
-	get_data: function(key)
-	{
-		return data[key];
-	},
-	
-	// Stores a variable in the lua state to persist through UI reloads.
-	store_data: function(key, value)
-	{
-		//data[key] = value; // "caching" would be useful, but not desired for debugging
-		return radiant.call('jelly:store_data', key, value);
-	}
+   // Prints something to the console
+   print : function()
+   {
+      return radiant.callv('jelly:print', arguments);
+   },
+   
+   // Returns the value of a previously lua-stored value.
+   // These values are not saved in the game, but persist until the game is restarted.
+   get_data: function(key)
+   {
+      return data[key];
+   },
+   
+   // Stores a variable in the lua state to persist through UI reloads.
+   store_data: function(key, value)
+   {
+      //data[key] = value; // "caching" would be useful, but not desired for debugging
+      return radiant.call('jelly:store_data', key, value);
+   }
 };
 
 radiant.call('jelly:_get_server_data_store').done(function(o) {
-	tracer = radiant.trace(o.data_store).progress(function(update)
-	{
-		$(update.calls).each(function (k, v)
-		{
-			radiant.callv(v.fn, v.args);
-		});
-		
-		data = update.data;
-		console.debug(update);
-	});
+   tracer = radiant.trace(o.data_store).progress(function(update)
+   {
+      $(update.calls).each(function (k, v)
+      {
+         radiant.callv(v.fn, v.args);
+      });
+      
+      data = update.data;
+      console.debug(update);
+   });
 });
 
 // Patch errors to the console
@@ -66,16 +66,16 @@ var oldError = window.onerror;
 
 window.onerror = function(errorMsg, url, lineNumber)
 {
-	errorMsg = errorMsg || '(unknown error message)';
-	url = url || '(unknown url)';
-	lineNumber = lineNumber || '(unknown line number)';
-	
-	jelly.print('ERROR: ' + url + ':' + lineNumber + ': ' + errorMsg);
+   errorMsg = errorMsg || '(unknown error message)';
+   url = url || '(unknown url)';
+   lineNumber = lineNumber || '(unknown line number)';
+   
+   jelly.print('ERROR: ' + url + ':' + lineNumber + ': ' + errorMsg);
 
-	if (typeof oldError != 'undefined')
-		return oldError(errorMsg, url, lineNumber);
-	
-	return false;
+   if (typeof oldError != 'undefined')
+      return oldError(errorMsg, url, lineNumber);
+   
+   return false;
 }
 
 $(top).trigger('jelly.PostJellyInit');

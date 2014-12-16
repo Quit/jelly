@@ -1,12 +1,12 @@
 {
-	"base" : [ "jelly:template:default_tree" ],
-	
-	"maximum_density" : 4,
-	
-	"cluster" : true,
-	"cluster_density" : 0.5,
-	"cluster_factor" : 0.5,
-	"cluster_exclusion_radius" : 2,
-	
-	"vegetation_chance" : 0.2
+   "base" : [ "jelly:template:default_tree" ],
+   
+   "maximum_density" : 4,
+   
+   "cluster" : true,
+   "cluster_density" : 0.5,
+   "cluster_factor" : 0.5,
+   "cluster_exclusion_radius" : 2,
+   
+   "vegetation_chance" : 0.2
 }

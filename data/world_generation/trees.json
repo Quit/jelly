@@ -1,58 +1,58 @@
-	{
-	"trees" : [
-		{
-			"template" : [ "jelly:template:small_tree", "jelly:template:oak" ],
-			"entity_ref" : "stonehearth:small_oak_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:medium_tree", "jelly:template:oak" ],
-			"entity_ref" : "stonehearth:medium_oak_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:large_tree", "jelly:template:oak" ],
-			"entity_ref" : "stonehearth:large_oak_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:ancient_tree", "jelly:template:oak" ],
-			"entity_ref" : "stonehearth:ancient_oak_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:small_tree", "jelly:template:foothill_juniper" ],
-			"entity_ref" : "stonehearth:small_juniper_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:medium_tree", "jelly:template:foothill_juniper" ],
-			"entity_ref" : "stonehearth:medium_juniper_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:large_tree", "jelly:template:foothill_juniper" ],
-			"entity_ref" : "stonehearth:large_juniper_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:ancient_tree", "jelly:template:foothill_juniper" ],
-			"entity_ref" : "stonehearth:ancient_juniper_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:small_tree", "jelly:template:mountain_juniper" ],
-			"entity_ref" : "stonehearth:small_juniper_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:medium_tree", "jelly:template:mountain_juniper" ],
-			"entity_ref" : "stonehearth:medium_juniper_tree"
-		},
-		
-		{
-			"template" : [ "jelly:template:large_tree", "jelly:template:mountain_juniper" ],
-			"entity_ref" : "stonehearth:large_juniper_tree"
-		},
-	]
+   {
+   "trees" : [
+      {
+         "template" : [ "jelly:template:small_tree", "jelly:template:oak" ],
+         "entity_ref" : "stonehearth:small_oak_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:medium_tree", "jelly:template:oak" ],
+         "entity_ref" : "stonehearth:medium_oak_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:large_tree", "jelly:template:oak" ],
+         "entity_ref" : "stonehearth:large_oak_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:ancient_tree", "jelly:template:oak" ],
+         "entity_ref" : "stonehearth:ancient_oak_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:small_tree", "jelly:template:foothill_juniper" ],
+         "entity_ref" : "stonehearth:small_juniper_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:medium_tree", "jelly:template:foothill_juniper" ],
+         "entity_ref" : "stonehearth:medium_juniper_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:large_tree", "jelly:template:foothill_juniper" ],
+         "entity_ref" : "stonehearth:large_juniper_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:ancient_tree", "jelly:template:foothill_juniper" ],
+         "entity_ref" : "stonehearth:ancient_juniper_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:small_tree", "jelly:template:mountain_juniper" ],
+         "entity_ref" : "stonehearth:small_juniper_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:medium_tree", "jelly:template:mountain_juniper" ],
+         "entity_ref" : "stonehearth:medium_juniper_tree"
+      },
+      
+      {
+         "template" : [ "jelly:template:large_tree", "jelly:template:mountain_juniper" ],
+         "entity_ref" : "stonehearth:large_juniper_tree"
+      },
+   ]
 }
