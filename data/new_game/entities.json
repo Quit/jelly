@@ -7,28 +7,28 @@
          "x" : -3,
          "z" : -3,
          
-         "item" : "stonehearth:oak_log"
+         "item" : "stonehearth:resources:wood:oak_log"
       },
       
       {
          "x" : 0,
          "z" : -3,
          
-         "item" : "stonehearth:oak_log"
+         "item" : "stonehearth:resources:wood:oak_log"
       },
       
       {
          "x" : 3,
          "z" : -3,
          
-         "item" : "stonehearth:trapper:knife_talisman"
+         "item" : "stonehearth:trapper:talisman"
       },
       
       {
          "x" : -3,
          "z" : 3,
          
-         "item" : "stonehearth:carpenter:saw_talisman"
+         "item" : "stonehearth:carpenter:talisman"
       },
       
       {
