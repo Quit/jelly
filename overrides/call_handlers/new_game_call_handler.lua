@@ -246,7 +246,7 @@ function NewGameCallHandler:create_camp(session, response, pt)
 	end
 	
 	for _, entityDef in pairs(json.entities) do
-		self:place_item(pop, entityDef.entity_ref, camp_x + entityDef.x, camp_z + entityDef.z, { force_iconic = false })
+		self:place_item(pop, entityDef.entity_ref, camp_x + entityDef.x, camp_z + entityDef.z, { force_iconic = entityDef.force_iconic or false })
 	end
 	--[[ END JELLY ]]--
   
