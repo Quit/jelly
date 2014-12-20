@@ -81,7 +81,7 @@ local ticking_timers = {}
 
 -- Gameloop listener.
 -- Goes through the list of timers, checks if they need to run, calls them if necessary.
-local function on_gameloop(event)
+function timers:_on_gameloop(event)
   last_now = event.now
   
   -- List of "run out" timers
@@ -117,11 +117,11 @@ end
 
 -- On the server, timers are on the gameloop, which is all ~200ms
 if radiant.is_server then
-  radiant.events.listen(radiant.events, 'stonehearth:gameloop', on_gameloop)
+  radiant.events.listen(radiant, 'stonehearth:gameloop', timers, timers._on_gameloop)
 else
   -- On the client, we don't have such a thing yet. Hacks ahoy!
   timers._frame_tracer = _radiant.client.trace_render_frame()
-  timers._frame_tracer:on_frame_start("update jelly client timers", function(now, alpha, frame_time) on_gameloop({ now = now }) end)
+  timers._frame_tracer:on_frame_start("update jelly client timers", function(now, alpha, frame_time) timers._on_gameloop({ now = now }) end)
 end
 
 --[[ jelly public functions ]]--
@@ -177,7 +177,7 @@ end
 --! param value id Id used to create the timer
 --! returns `Timer` object
 function timers.get_timer(id)
-  return timers[id]
+  return ticking_timers[id]
 end
 
 --[[ Timer class ]]--
@@ -187,7 +187,7 @@ Timer = class()
 
 --! hidden
 function Timer:__init(id, interval, repetition, func, ...)
-  assert(id)
+  assert(id, 'No timer ID given')
   radiant.check.is_number(interval)
   radiant.check.is_number(repetition)
   radiant.check.is_function(func)
