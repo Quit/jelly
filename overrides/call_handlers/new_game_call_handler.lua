@@ -181,6 +181,8 @@ function NewGameCallHandler:choose_camp_location(session, response)
 	print(json.ghost_banner_entity)
 	--[[ END JELLY ]]
 	stonehearth.selection:select_location():use_ghost_entity_cursor(json.ghost_banner_entity):done(function(selector, location, rotation)
+    local clip_height = self:_get_starting_clip_height(location)
+    stonehearth.subterranean_view:set_clip_height(clip_height)
     _radiant.call("stonehearth:create_camp", location):done(function(o)
       response:resolve({
         result = true,
@@ -202,6 +204,15 @@ function NewGameCallHandler:_destroy_capture()
     self._input_capture:destroy()
     self._input_capture = nil
   end
+end
+
+function NewGameCallHandler:_get_starting_clip_height (starting_location)
+  local step_size = constants.mining.Y_CELL_SIZE
+  local quantized_height = math.floor(starting_location.y / step_size) * step_size
+  local next_step = quantized_height + step_size
+  local clip_height = next_step - 1
+
+  return clip_height
 end
 
 function NewGameCallHandler:create_camp(session, response, pt)
