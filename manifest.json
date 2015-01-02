@@ -26,6 +26,11 @@
       "actions:think" : "file(ai/think.lua)",
       "actions:unthink" : "file(ai/unthink.lua)"
    },
+
+   "overrides" : 
+   {
+      "/stonehearth/ui/game/promotion_tree/promotion_tree.js" : "file(overrides/ui/game/promotion_tree/promotion_tree.js)"
+   },
    
    "functions" : {
       "_get_server_data_store" : {
