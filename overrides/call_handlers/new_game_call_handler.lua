@@ -43,13 +43,7 @@ local GENERATION_RADIUS = 2
 local NewGameCallHandler = class()
 
 function NewGameCallHandler:sign_in(session, response, num_tiles_x, num_tiles_y, seed)
-	local town = stonehearth.town:get_town(session.player_id)
-  
-  if not town then
-    stonehearth.town:add_town(session)
-    stonehearth.inventory:add_inventory(session)
-    stonehearth.population:add_population(session, "stonehearth:kingdoms:ascendancy")
-  end
+  stonehearth.player:add_player(session.player_id, 'stonehearth:kingdoms:ascendancy')
   
 	return {
 		version = _radiant.sim.get_version()

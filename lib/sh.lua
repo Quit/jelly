@@ -36,7 +36,6 @@ end
 -- Define a list of classes we might want to use, including name.
 local classes = 
 {
-  TerrainType = "services.server.world_generation.terrain_type",
   TerrainInfo = "services.server.world_generation.terrain_info",
   Array2D = "services.server.world_generation.array_2D",
   MathFns = "services.server.world_generation.math.math_fns",

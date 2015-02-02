@@ -25,7 +25,6 @@ SOFTWARE.
 
 
 local jelly = require('jelly')
-local TerrainType = radiant.mods.require("stonehearth.services.server.world_generation.terrain_type")
 local log = radiant.log.create_logger("server")
 
 local MOD = class()

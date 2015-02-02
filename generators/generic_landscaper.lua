@@ -27,7 +27,7 @@ local jelly = jelly
 
 local log = radiant.log.create_logger("world_generation")
 
-local TerrainType, FilterFns = jelly.sh.TerrainType, jelly.sh.FilterFns
+local FilterFns = jelly.sh.FilterFns
 
 local Generator = class()
 
@@ -59,7 +59,7 @@ function Generator:mark()
   args.noise_map, args.density_map = noise_map, density_map
   
   -- Fill the noise map
-  noise_map:fill_ij(function(i, j) return self._noise_func(i, j, args) end)
+  noise_map:fill(function(i, j) return self._noise_func(i, j, args) end)
   -- trees: 2D_0125 (10)
   -- bushes: 2D_050 (6)
   -- flowers: 2D_025 (8)

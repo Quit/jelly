@@ -49,7 +49,7 @@
    
    "entities" : [
       {
-         "entity_ref" : "stonehearth:firepit",
+         "entity_ref" : "stonehearth:decoration:firepit",
          "x" : 0,
          "z" : 3
       }

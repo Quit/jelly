@@ -30,14 +30,13 @@ SOFTWARE.
 	the original game files and its copyright belongs entirely to Radiant Entertainment.
 --]]--
 
-local TerrainType = require("services.server.world_generation.terrain_type")
 local TerrainInfo = require("services.server.world_generation.terrain_info")
 local Array2D = require("services.server.world_generation.array_2D")
 local FilterFns = require("services.server.world_generation.filter.filter_fns")
 local PerturbationGrid = require("services.server.world_generation.perturbation_grid")
 local BoulderGenerator = require("services.server.world_generation.boulder_generator")
-local log = radiant.log.create_logger("world_generation")
 local Point3 = _radiant.csg.Point3
+local log = radiant.log.create_logger("world_generation")
 local mod_name = "stonehearth"
 local mod_prefix = mod_name .. ":"
 local oak = "oak_tree"
@@ -68,20 +67,16 @@ local GenericLandscaper = require('jelly.generators.generic_landscaper')
 local boulder_name = "boulder"
 local Landscaper = class()
 
-function Landscaper:__init(terrain_info, rng, async)
-  if async == nil then
-    async = false
-  end
+function Landscaper:__init(terrain_info, rng)
   self._terrain_info = terrain_info
   self._tile_width = self._terrain_info.tile_size
   self._tile_height = self._terrain_info.tile_size
   self._feature_size = self._terrain_info.feature_size
   self._rng = rng
-  self._async = async
   self._boulder_probabilities = {
-    [TerrainType.plains] = 0.02,
-    [TerrainType.foothills] = 0.02,
-    [TerrainType.mountains] = 0.02
+    plains = 0.02,
+    foothills = 0.02,
+    mountains = 0.02,
   }
   self._boulder_generator = BoulderGenerator(self._terrain_info, self._rng)
   self._noise_map_buffer = nil
@@ -160,14 +155,14 @@ function Landscaper:mark_trees(elevation_map, feature_map)
 		local elevation = elevation_map:get(i, j)
 		local terrain_type, step = terrain_info:get_terrain_type_and_step(elevation)
 		
-		if terrain_type == TerrainType.mountains then
+		if terrain_type == 'mountains' then
 			if step <= 2 then
 				mean = mean + 50
 				std_dev = 0
 			else
 				std_dev = std_dev * 0.3
 			end
-		elseif terrain_type == TerrainType.plains then
+		elseif terrain_type == 'plains' then
 			if step == 2 then
 				mean = mean - 5
 			else
@@ -194,10 +189,10 @@ function Landscaper:_get_tree_type(terrain_type, step)
   local terrain_info = self._terrain_info
   local high_foothills_juniper_chance = 0.75
   local low_foothills_juniper_chance = 0.25
-  if terrain_type == TerrainType.plains then
+  if terrain_type == 'plains' then
     return oak
   end
-  if terrain_type == TerrainType.mountains then
+  if terrain_type == 'mountains' then
     return juniper
   end
   if step == 2 then
@@ -230,7 +225,7 @@ function Landscaper:_place_small_tree(feature_name, i, j, tile_map, place_item)
   local center = self._feature_size * 0.5
   local elevation = tile_map:get(x + center, y + center)
   local terrain_type = self._terrain_info:get_terrain_type(elevation)
-  if terrain_type == TerrainType.mountains then
+  if terrain_type == 'mountains' then
     return self:_place_normal_tree(feature_name, i, j, tile_map, place_item)
   end
   nested_grid_spacing = math.floor(perturbation_grid.grid_spacing * factor)
@@ -273,7 +268,6 @@ function Landscaper:place_features(tile_map, feature_map, place_item)
 			
 			--[[ JELLY END ]]--
     end
-    self:_yield()
   end
 	
 	for feature_name, count in pairs(features_by_name) do
@@ -311,7 +305,7 @@ function Landscaper:_place_berry_bush(feature_name, i, j, tile_map, place_item)
   local function try_place_item(x, y)
     local elevation = tile_map:get(x, y)
     local terrain_type = terrain_info:get_terrain_type(elevation)
-    if terrain_type == TerrainType.mountains then
+    if terrain_type == 'mountains' then
       return false
     end
     place_item(feature_name, x, y)
@@ -409,15 +403,24 @@ function Landscaper:_is_flat(tile_map, x, y, distance)
   if distance == 0 then
     return true
   end
+  
   local start_x, start_y = tile_map:bound(x - distance, y - distance)
   local end_x, end_y = tile_map:bound(x + distance, y + distance)
   local block_width = end_x - start_x + 1
   local block_height = end_y - start_y + 1
   local height = tile_map:get(x, y)
   local is_flat = true
-  is_flat = tile_map:visit_block(start_x, start_y, block_width, block_height, function(value)
-    return value == height
-  end)
+  
+  tile_map:visit_block(start_x, start_y, block_width, block_height, 
+    function (value)
+      if value ~= height then
+        is_flat = false
+
+        return true
+      end
+    end
+  )
+    
   return is_flat
 end
 
@@ -467,19 +470,12 @@ function Landscaper:place_boulders(region3_boxed, tile_map, feature_map)
       end
     end
   end)
-  self:_yield()
 end
 
 function Landscaper:_should_place_boulder(elevation)
   local terrain_type = self._terrain_info:get_terrain_type(elevation)
   local probability = self._boulder_probabilities[terrain_type]
   return probability > self._rng:get_real(0, 1)
-end
-
-function Landscaper:_yield()
-  if self._async then
-    coroutine.yield()
-  end
 end
 
 --[[ START JELLY CODE ]]--
