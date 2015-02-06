@@ -23,12 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=============================================================================]
 
--- Make assert more useful by telling *where the assertion failed*
-function assert(condition, msg)
+function radiant.check.verify(condition)
   if not condition then
-    _host:log("env", 1, msg)
-    error(msg or 'assertion failed!', 2)
-  else
-    return condition
+    local func_name = debug.getinfo(2, 'n').name or 'condition'
+    error(func_name .. ' failed!', 3)
   end
 end
