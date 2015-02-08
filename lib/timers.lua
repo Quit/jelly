@@ -81,8 +81,8 @@ local ticking_timers = {}
 
 -- Gameloop listener.
 -- Goes through the list of timers, checks if they need to run, calls them if necessary.
-function timers:_on_gameloop(event)
-  last_now = event.now
+function timers:_on_gameloop()
+  last_now = radiant.gamestate.now()
   
   -- List of "run out" timers
   local t = {}
