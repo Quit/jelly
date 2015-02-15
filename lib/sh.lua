@@ -38,7 +38,6 @@ local classes =
 {
   TerrainInfo = "services.server.world_generation.terrain_info",
   Array2D = "services.server.world_generation.array_2D",
-  MathFns = "services.server.world_generation.math.math_fns",
   FilterFns = "services.server.world_generation.filter.filter_fns",
   PerturbationGrid = "services.server.world_generation.perturbation_grid",
   BoulderGenerator = "services.server.world_generation.boulder_generator"
