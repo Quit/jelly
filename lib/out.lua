@@ -43,6 +43,8 @@ do -- Overwrites `io.output' to our log file(s)
       t[i] = tostring(t[i])
       io.write(t[i])
       
+      t[i] = t[i]:gsub('%%', '%%%%')
+      
       if i < argc then
         io.write("\t")
       end
