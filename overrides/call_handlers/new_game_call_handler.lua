@@ -33,7 +33,7 @@ SOFTWARE.
 local Array2D = require 'services.server.world_generation.array_2D'
 local BlueprintGenerator = require("services.server.world_generation.blueprint_generator")
 local personality_service = stonehearth.personality
-local linear_combat_service = stonehearth.linear_combat
+local interval_service = stonehearth.interval
 local Point2 = _radiant.csg.Point2
 local Point3 = _radiant.csg.Point3
 local Rect2 = _radiant.csg.Rect2
@@ -51,7 +51,7 @@ function NewGameCallHandler:sign_in(session, response, num_tiles_x, num_tiles_y,
 end
 
 function NewGameCallHandler:set_game_options(session, response, options)
-  linear_combat_service:enable(options.enable_enemies)
+  interval_service:enable(true)
   return true
 end
 
@@ -172,7 +172,6 @@ end
 function NewGameCallHandler:choose_camp_location(session, response)
 	--[[ BEGIN JELLY ]]--
 	local json = radiant.resources.load_json('jelly:index:camp_start')
-	print(json.ghost_banner_entity)
 	--[[ END JELLY ]]
 	stonehearth.selection:select_location():use_ghost_entity_cursor(json.ghost_banner_entity):done(function(selector, location, rotation)
     local clip_height = self:_get_starting_clip_height(location)
@@ -219,7 +218,7 @@ function NewGameCallHandler:create_camp(session, response, pt)
 	local json = radiant.resources.load_json('jelly:index:camp_start')
 	
   local location = Point3(pt.x, pt.y, pt.z)
-  local banner_entity = radiant.entities.create_entity(json.banner_entity)
+  local banner_entity = radiant.entities.create_entity(json.banner_entity, { owner = session.player_id })
   radiant.terrain.place_entity(banner_entity, location, { force_iconic = false })
   town:set_banner(banner_entity)
 --~ 	radiant.entities.turn_to(banner_entity, 180)
@@ -274,7 +273,7 @@ function NewGameCallHandler:place_citizen (pop, x, z, job, talisman)
 end
 
 function NewGameCallHandler:place_item(pop, uri, x, z, options)
-  local entity = radiant.entities.create_entity(uri)
+  local entity = radiant.entities.create_entity(uri, { owner = player_id })
   radiant.terrain.place_entity(entity, Point3(x, 1, z), options)
 	entity:add_component("unit_info"):set_player_id(pop:get_player_id())
   return entity

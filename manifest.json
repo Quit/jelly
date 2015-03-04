@@ -21,15 +21,7 @@
       "index:bushes" : "file(data/world_generation/bushes.json)",
          "template:default_bush" : "file(data/world_generation/bush_templates/default_bush.json)",
          
-      "index:camp_start" : "file(data/new_game/entities.json)",
-      
-      "actions:think" : "file(ai/think.lua)",
-      "actions:unthink" : "file(ai/unthink.lua)"
-   },
-
-   "overrides" : 
-   {
-      "/stonehearth/ui/game/promotion_tree/promotion_tree.js" : "file(overrides/ui/game/promotion_tree/promotion_tree.js)"
+      "index:camp_start" : "file(data/new_game/entities.json)"
    },
    
    "functions" : {
