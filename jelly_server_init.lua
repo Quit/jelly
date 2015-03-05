@@ -64,6 +64,22 @@ function MOD:_patch(original_path, patched_path)
     return radiant.mods.require(original_mod .. path)
   end
   
+  local old___get_current_module_name = __get_current_module_name
+  
+  local callee_filename = '@' .. patched_path:gsub('%.', '/') .. '.lua'
+  
+  function __get_current_module_name(depth)
+    local old_result = old___get_current_module_name(depth + 1)
+    local callee = debug.getinfo(3, 'S').source
+    
+    if depth == 3 and old_result == 'jelly' and callee == callee_filename then
+      log:spam('changed module name from "jelly" to %q (%q)', original_mod, debug.getinfo(3, 'S').source)
+      return original_mod
+    end
+    
+    return old_result
+  end
+  
   log:spam('require patch file %q', patched_path)
   local patch = radiant.mods.require(patched_path)
   
