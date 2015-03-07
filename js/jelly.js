@@ -57,7 +57,6 @@ radiant.call('jelly:_get_server_data_store').done(function(o) {
       });
       
       data = update.data;
-      console.debug(update);
    });
 });
 
