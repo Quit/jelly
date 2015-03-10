@@ -232,6 +232,50 @@ function util.compile(str, args)
   return loadstring(string.format('local %s=... return %s', table.concat(args, ','), str))
 end
 
+-- Used to allow chaining of linq functions
+-- without interfering with the normal metatable's index
+-- (if available)
+
+local linq_meta_index_table
+
+local function __linq_index(tbl, key)
+  local m = getmetatable(tbl)
+  local val
+  
+  if m.__jelly_pre_linq_index then
+    val = m.__jelly_pre_linq_index(tbl, key)
+    if val ~= nil then
+      return val
+    end
+  end
+  
+  -- Is it a linq function?
+  return linq_meta_index_table[key]
+end
+
+--! desc Sets the metatable of `tbl` to allow chaining of operations
+--! param table tbl Table that should be linqified
+function util.linqify(tbl)
+  local m = getmetatable(tbl)
+  
+  if m then
+    -- If this table was already patched, don't patch it again
+    if m.__jelly_linqed then
+      return tbl
+    end
+    
+    if m.__index then
+      m.__jelly_pre_linq_index = m.__index
+    end
+  else
+    m = {}
+  end
+  
+  m.__index = __linq_index
+  m.__jelly_linqed = true
+  return setmetatable(tbl, m)
+end
+
 --! desc Maps `tbl` using `func`.
 --! param table tbl Table that should be mapped
 --! param function func Function that receives two arguments (`key`, `value`) and returns the new element.
@@ -242,21 +286,21 @@ function util.map(tbl, func)
     t[k] = v
   end
   
-  return t
+  return util.linqify(t)
 end
 
---! desc Greps `tbl` using `func`
---! param table tbl Table that should be grepped
---! param function func Function that receives two arguments: (`key`, `value`) and returns true if the element should be taken over, false otherwise
+--! desc Filters `tbl` using `func`
+--! param table tbl Table that should be filtered
+--! param function func Function that receives two arguments: (`key`, `value`) and returns true if the element should be taken, false otherwise
 --! returns table with reduced entries
---! remarks **Note:** This function will **not** re-sort the table; i.e. the keys are consistent. This can lead to "holes".
-function util.grep(tbl, func)
+--! remarks **Note:** This function will **not** re-sort the table; i.e. the keys are consistent. This can lead to "holes". Use to_list() to fix these if an array is desired.
+function util.where(tbl, func)
   local t = {}
   for k, v in jelly.linq.where_pairs(tbl, func) do
     t[k] = v
   end
   
-  return t
+  return util.linqify(t)
 end
 
 --! desc re-sorts `tbl` to be a normal array without "holes" as keys.
@@ -271,8 +315,15 @@ function util.to_list(tbl)
     tn = tn + 1
   end
   
-  return t
+  return util.linqify(t)
 end
+
+linq_meta_index_table =
+{
+  map = util.map,
+  where = util.where,
+  to_list = util.to_list
+}
 
 --! desc Returns the best key/value in a table by calling `func` on each pair to evaluate it
 --! param table tbl Table to maximize over
