@@ -5,6 +5,7 @@
    },
    
    "server_init_script" : "file(jelly_server_init)",
+   "client_init_script" : "file(jelly_client_init)",
    
    "aliases" : {
       "index:trees" : "file(data/world_generation/trees.json)",
