@@ -71,7 +71,7 @@ window.onerror = function(errorMsg, url, lineNumber)
    
    jelly.print('ERROR: ' + url + ':' + lineNumber + ': ' + errorMsg);
 
-   if (typeof oldError != 'undefined')
+   if (typeof oldError != 'undefined' && oldError != null)
       return oldError(errorMsg, url, lineNumber);
    
    return false;
