@@ -44,7 +44,8 @@
    "ui" : {
       "js" : [
          "file(js/jelly.js)",
-         "file(js/RootView.js)"
+         "file(js/RootView.js)",
+         "file(js/StartMenuView.js)"
       ]
    }
 }
