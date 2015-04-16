@@ -43,8 +43,8 @@ do -- table.show, table.print
      local function isemptytable(t) return next(t) == nil end
 
      local function basicSerialize (o)
-        local so = tostring(o)
         if type(o) == "function" then
+           local so = tostring(o)
            local info = debug.getinfo(o, "S")
            -- info.name is nil because o is not a calling level
            if info.what == "C" then
@@ -56,9 +56,16 @@ do -- table.show, table.print
                   ")" .. info.source)
            end
         elseif type(o) == "number" or type(o) == "boolean" then
-           return so
+           return tostring(o)
+        elseif type(o) == "userdata" then
+          local suc, ret = pcall(tostring, o)
+          if suc then
+            return ret
+          else
+            return '"userdata"'
+          end
         else
-           return string.format("%q", so)
+           return string.format("%q", tostring(o))
         end
      end
 
