@@ -35,7 +35,8 @@ end
 
 function MOD:_patch_all()
   log:info('Patch stuff.')
-  self:_patch('stonehearth.services.server.world_generation.landscaper', 'jelly.overrides.services.world_generation.landscaper')
+  -- Increased complexity with the water update.
+  --self:_patch('stonehearth.services.server.world_generation.landscaper', 'jelly.overrides.services.world_generation.landscaper')
   self:_patch('stonehearth.call_handlers.new_game_call_handler', 'jelly.overrides.call_handlers.new_game_call_handler')
 end
 
