@@ -33,8 +33,6 @@ SOFTWARE.
 local constants = require 'constants'
 local Array2D = require 'services.server.world_generation.array_2D'
 local BlueprintGenerator = require 'services.server.world_generation.blueprint_generator'
-local personality_service = stonehearth.personality
-local interval_service = stonehearth.interval
 local Point2 = _radiant.csg.Point2
 local Point3 = _radiant.csg.Point3
 local Point3 = _radiant.csg.Point3
@@ -53,9 +51,9 @@ function NewGameCallHandler:sign_in (session, response, num_tiles_x, num_tiles_y
 end
 
 function NewGameCallHandler:set_game_options (session, response, options)
-  interval_service:enable(true)
   if not options.enable_enemies then
     stonehearth.game_master:enable_campaign_type('combat', false)
+    stonehearth.game_master:enable_campaign_type('ambient_threats', false)
   end
 
   return true
@@ -212,6 +210,10 @@ function NewGameCallHandler:_get_starting_clip_height (starting_location)
 end
 
 function NewGameCallHandler:create_camp (session, response, pt)
+  stonehearth.calendar:start()
+  stonehearth.game_master:start()
+  stonehearth.hydrology:start()
+  stonehearth.interval:enable(true)
   stonehearth.world_generation:set_starting_location(Point2(pt.x, pt.z))
   local town = stonehearth.town:get_town(session.player_id)
   local pop = stonehearth.population:get_population(session.player_id)
@@ -230,7 +232,7 @@ function NewGameCallHandler:create_camp (session, response, pt)
   local camp_z = pt.z
   local function place_citizen_embark (x, z, job, talisman)
     local citizen = self:place_citizen(pop, x, z, job, talisman)
-    radiant.events.trigger_async(personality_service, 'stonehearth:journal_event', 
+    radiant.events.trigger_async(stonehearth.personality, 'stonehearth:journal_event', 
       {
           entity = citizen,
           description = 'person_embarks',
@@ -274,7 +276,6 @@ function NewGameCallHandler:create_camp (session, response, pt)
   radiant.events.trigger_async(jelly, 'jelly:camp_created', banner_entity)
   
   --[[ END JELLY ]]--
-  stonehearth.game_master:start()
   return {
     random_town_name = random_town_name,
   }
