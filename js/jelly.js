@@ -51,7 +51,7 @@ jelly = {
 radiant.call('jelly:_get_server_data_store').done(function(o) {
    tracer = radiant.trace(o.data_store).progress(function(update)
    {
-      $(update.calls).each(function (k, v)
+      $.each(update.calls, function (k, v)
       {
          radiant.callv(v.fn, v.args);
       });
