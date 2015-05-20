@@ -23,8 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=============================================================================]
 
-local stdout = radiant.log.create_logger('out')
-
 -- Note: Most/all of these functions are global too, because they are "too vital"
 -- TODO: Make globalisation optional.
 local out = {}
@@ -54,7 +52,7 @@ do -- Overwrites `io.output' to our log file(s)
     io.flush()
     
     if to_logger then
-      stdout:write(0, table.concat(t, '\t'))
+      radiant.log.write('stdout', 0, table.concat(t, '\t'))
     end
   end
   
@@ -64,7 +62,7 @@ do -- Overwrites `io.output' to our log file(s)
   
   function printf(str, ...)
     print_plain(false, string.format(str, ...))
-    stdout:write(0, str, ...)
+    radiant.log.write('stdout', 0, str, ...)
   end
   
   out.print, out.printf = print, printf
