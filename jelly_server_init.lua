@@ -30,79 +30,14 @@ local log = radiant.log.create_logger("server")
 local MOD = class()
 
 function MOD:__init()
-  radiant.events.listen(radiant, 'radiant:modules_loaded', self, self._patch_all)
+  radiant.events.listen(radiant, 'radiant:required_loaded', self, self._patch_all)
 end
 
 function MOD:_patch_all()
   log:info('Patch stuff.')
   -- Increased complexity with the water update.
   --self:_patch('stonehearth.services.server.world_generation.landscaper', 'jelly.overrides.services.world_generation.landscaper')
-  self:_patch('stonehearth.call_handlers.new_game_call_handler', 'jelly.overrides.call_handlers.new_game_call_handler')
-end
-
-function MOD:_patch(original_path, patched_path)
-  log:info('patch %q -> %q', original_path, patched_path)
-  -- Require both files
-  log:spam('require source file %q', original_path)
-  local source = radiant.mods.require(original_path)
-  
-  -- Get the source mod
-  local original_mod = original_path:match('^(.-%.)')
-  
-  local old_require = require
-  
-  function require(path)
-    if path:sub(-4) == '.lua' then
-      path = path:sub(1, -4)
-    end
-    
-    if path:sub(1, 5) == 'jelly' then
-      return radiant.mods.require(path)
-    end
-    
-    log:spam('include %q (translated to %s%s)', path, original_mod, path)
-    
-    return radiant.mods.require(original_mod .. path)
-  end
-  
-  local old___get_current_module_name = __get_current_module_name
-  
-  local callee_filename = '@' .. patched_path:gsub('%.', '/') .. '.lua'
-  
-  function __get_current_module_name(depth)
-    local old_result = old___get_current_module_name(depth + 1)
-    local callee = debug.getinfo(3, 'S').source
-    
-    if depth == 3 and old_result == 'jelly' and callee == callee_filename then
-      log:spam('changed module name from "jelly" to %q (%q)', original_mod, debug.getinfo(3, 'S').source)
-      return original_mod
-    end
-    
-    return old_result
-  end
-  
-  log:spam('require patch file %q', patched_path)
-  local patch = radiant.mods.require(patched_path)
-  
-  require = old_require
-    
-  if not patch then
-    error('cannot find patch file '.. patched_path .. ' _or_ there was an error')
-    return
-  end
-  
-  -- Clear source
-  for k, v in pairs(source) do
-    source[k] = nil
-  end
-  
-  -- Create the patch
-  for k, v in pairs(patch) do
-    source[k] = v
-  end
-  
-  -- Set the metatable
-  setmetatable(source, getmetatable(patch))
+  jelly.patch.lua('stonehearth.call_handlers.new_game_call_handler', 'jelly.overrides.call_handlers.new_game_call_handler')
 end
 
 -- Because of Stonehearths... rather undesirable mod loading process, we alias those who don't require() us.

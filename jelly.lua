@@ -35,6 +35,7 @@ jelly.sh = require('lib.sh')
 jelly.timers = require('lib.timers')
 jelly.tasks = require('lib.tasks')
 jelly.out = require('lib.out')
+jelly.patch = require('lib.patch')
 
 -- lua standard library extensions
 require('lib.table')
