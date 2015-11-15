@@ -61,8 +61,16 @@ do -- Overwrites `io.output' to our log file(s)
   end
   
   function printf(str, ...)
-    print_plain(false, string.format(str, ...))
-    radiant.log.write('stdout', 0, str, ...)
+    local t = { ... }
+    local argc = select('#', ...)
+    for i = 1, argc do
+      if type(t[i]) ~= 'number' then
+        t[i] = tostring(t[i])
+      end
+    end
+
+    print_plain(false, string.format(str, unpack(t)))
+    radiant.log.write('stdout', 0, str, unpack(t))
   end
   
   out.print, out.printf = print, printf
